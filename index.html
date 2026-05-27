@@ -1,0 +1,3753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SINGH MART — Point of Sale System</title>
+<meta name="description" content="SINGH MART POS - Professional Point of Sale System for Indian Supermarket">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════
+   DESIGN SYSTEM & CSS VARIABLES
+   ═══════════════════════════════════════════════ */
+:root {
+  --c-primary: #FFD600;
+  --c-primary-hover: #FFEA00;
+  --c-primary-dim: rgba(255,214,0,0.15);
+  --c-primary-glow: rgba(255,214,0,0.3);
+  --c-bg: #111111;
+  --c-bg-card: #1a1a1a;
+  --c-bg-elevated: #222222;
+  --c-bg-input: #2a2a2a;
+  --c-border: #333333;
+  --c-border-light: #444444;
+  --c-text: #f0f0f0;
+  --c-text-dim: #999999;
+  --c-text-muted: #666666;
+  --c-success: #00E676;
+  --c-danger: #FF5252;
+  --c-warning: #FFA726;
+  --c-info: #40C4FF;
+  --c-upi: #5C3DC7;
+  --c-card: #1565C0;
+  --c-wallet: #FF6F00;
+  --font-heading: 'Bebas Neue', sans-serif;
+  --font-body: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.5);
+  --shadow-glow: 0 0 20px rgba(255,214,0,0.2);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  --z-header: 100;
+  --z-modal: 1000;
+  --z-toast: 2000;
+}
+
+/* Light Mode */
+:root.light-mode {
+  --c-bg: #f5f5f5;
+  --c-bg-card: #ffffff;
+  --c-bg-elevated: #f0f0f0;
+  --c-bg-input: #e8e8e8;
+  --c-border: #dddddd;
+  --c-border-light: #cccccc;
+  --c-text: #111111;
+  --c-text-dim: #666666;
+  --c-text-muted: #999999;
+  --c-primary-dim: rgba(255,214,0,0.2);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.1);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.15);
+}
+
+/* ═══════════════════════════════════════════════
+   RESET & BASE
+   ═══════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; -webkit-font-smoothing: antialiased; }
+body {
+  font-family: var(--font-body);
+  background: var(--c-bg);
+  color: var(--c-text);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+button { cursor: pointer; border: none; font-family: inherit; }
+input, select { font-family: inherit; outline: none; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--c-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--c-border-light); }
+
+/* ═══════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════ */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes slideDown { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+@keyframes shimmer { 0% { background-position: -200px 0; } 100% { background-position: calc(200px + 100%) 0; } }
+@keyframes cartAdd { 0% { transform: scale(1); } 30% { transform: scale(1.15); } 100% { transform: scale(1); } }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+@keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes toastOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ═══════════════════════════════════════════════
+   HEADER BAR
+   ═══════════════════════════════════════════════ */
+#app-header {
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  border-bottom: 2px solid var(--c-primary);
+  padding: 8px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: var(--z-header);
+  position: relative;
+  min-height: 56px;
+}
+#app-header::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--c-primary), transparent);
+}
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.header-logo {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  color: var(--c-primary);
+  letter-spacing: 3px;
+  line-height: 1;
+  text-shadow: 0 0 20px rgba(255,214,0,0.3);
+}
+.header-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: 0.7rem;
+  color: var(--c-text-dim);
+  font-family: var(--font-mono);
+}
+.header-center {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.header-info-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--c-bg-elevated);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  color: var(--c-text-dim);
+  border: 1px solid var(--c-border);
+}
+.header-info-pill .icon { font-size: 0.9rem; }
+.header-info-pill .value { color: var(--c-text); font-weight: 500; }
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+#live-clock {
+  font-family: var(--font-mono);
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--c-primary);
+  letter-spacing: 2px;
+  min-width: 90px;
+  text-align: right;
+}
+#live-date {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--c-text-dim);
+  text-align: right;
+}
+.header-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--c-bg-elevated);
+  border: 1px solid var(--c-border);
+  color: var(--c-text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: all var(--transition-fast);
+}
+.header-btn:hover {
+  background: var(--c-primary);
+  color: var(--c-bg);
+  border-color: var(--c-primary);
+  box-shadow: var(--shadow-glow);
+}
+
+/* ═══════════════════════════════════════════════
+   MAIN LAYOUT
+   ═══════════════════════════════════════════════ */
+#app-main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════
+   LEFT PANEL — POS INTERFACE
+   ═══════════════════════════════════════════════ */
+#pos-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  gap: 10px;
+  overflow: hidden;
+}
+
+/* NAV TABS */
+.nav-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--c-bg-card);
+  padding: 4px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--c-border);
+}
+.nav-tab {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--c-text-dim);
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  letter-spacing: 1.5px;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.nav-tab:hover { color: var(--c-text); background: var(--c-bg-elevated); }
+.nav-tab.active {
+  background: var(--c-primary);
+  color: var(--c-bg);
+  box-shadow: var(--shadow-glow);
+}
+.nav-tab .badge {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  background: var(--c-danger);
+  color: white;
+  padding: 1px 5px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+/* SEARCH BAR */
+.search-container {
+  position: relative;
+  display: flex;
+  gap: 8px;
+}
+#search-input {
+  flex: 1;
+  background: var(--c-bg-card);
+  border: 2px solid var(--c-border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px 10px 40px;
+  font-size: 0.95rem;
+  color: var(--c-text);
+  transition: all var(--transition-fast);
+  font-family: var(--font-body);
+}
+#search-input:focus {
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 3px var(--c-primary-dim);
+}
+#search-input::placeholder { color: var(--c-text-muted); }
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--c-text-muted);
+  font-size: 1rem;
+  pointer-events: none;
+}
+.search-actions {
+  display: flex;
+  gap: 6px;
+}
+.search-btn {
+  padding: 0 14px;
+  border-radius: var(--radius-md);
+  background: var(--c-bg-card);
+  border: 1px solid var(--c-border);
+  color: var(--c-text-dim);
+  font-size: 1rem;
+  transition: all var(--transition-fast);
+}
+.search-btn:hover {
+  background: var(--c-primary);
+  color: var(--c-bg);
+  border-color: var(--c-primary);
+}
+
+/* AUTOCOMPLETE */
+#autocomplete-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--c-bg-card);
+  border: 1px solid var(--c-border);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  max-height: 240px;
+  overflow-y: auto;
+  z-index: 50;
+  display: none;
+  box-shadow: var(--shadow-md);
+}
+#autocomplete-list.show { display: block; animation: slideDown var(--transition-fast); }
+.ac-item {
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  border-bottom: 1px solid var(--c-border);
+}
+.ac-item:last-child { border-bottom: none; }
+.ac-item:hover, .ac-item.highlighted { background: var(--c-primary-dim); }
+.ac-item-name {
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ac-item-name .cat-tag {
+  font-size: 0.6rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--c-bg-elevated);
+  color: var(--c-text-dim);
+  font-family: var(--font-mono);
+}
+.ac-item-price {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--c-primary);
+}
+
+/* CART TABLE */
+.cart-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--c-bg-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--c-border);
+  overflow: hidden;
+}
+.cart-header-row {
+  display: grid;
+  grid-template-columns: 40px 1fr 100px 120px 80px 36px;
+  padding: 8px 12px;
+  background: var(--c-bg-elevated);
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  letter-spacing: 1.5px;
+  color: var(--c-text-dim);
+  border-bottom: 1px solid var(--c-border);
+}
+.cart-body {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+.cart-item {
+  display: grid;
+  grid-template-columns: 40px 1fr 100px 120px 80px 36px;
+  padding: 8px 12px;
+  align-items: center;
+  border-bottom: 1px solid var(--c-border);
+  animation: slideUp var(--transition-fast);
+  transition: background var(--transition-fast);
+}
+.cart-item:hover { background: var(--c-bg-elevated); }
+.cart-item-num {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--c-text-muted);
+}
+.cart-item-name {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cart-item-price {
+  font-family: var(--font-mono);
+  color: var(--c-text-dim);
+  font-size: 0.85rem;
+}
+.cart-qty-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.qty-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: var(--c-bg-input);
+  border: 1px solid var(--c-border);
+  color: var(--c-text);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+.qty-btn:hover { background: var(--c-primary); color: var(--c-bg); border-color: var(--c-primary); }
+.qty-input {
+  width: 40px;
+  text-align: center;
+  background: var(--c-bg-input);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  color: var(--c-text);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 4px;
+}
+.cart-item-total {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--c-primary);
+  text-align: right;
+}
+.cart-remove-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--c-text-muted);
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+.cart-remove-btn:hover { background: var(--c-danger); color: white; }
+
+/* EMPTY CART */
+.cart-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--c-text-muted);
+  padding: 40px;
+}
+.cart-empty-icon { font-size: 3rem; opacity: 0.3; }
+.cart-empty-text { font-size: 0.9rem; font-weight: 500; }
+.cart-empty-hint { font-size: 0.75rem; }
+
+/* TOTALS SECTION */
+.totals-section {
+  background: var(--c-bg-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--c-border);
+  padding: 12px;
+}
+.totals-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 0.85rem;
+}
+.totals-row .label { color: var(--c-text-dim); }
+.totals-row .value { font-family: var(--font-mono); font-weight: 500; }
+.totals-row.discount .value { color: var(--c-success); }
+.totals-divider {
+  border: none;
+  border-top: 1px dashed var(--c-border);
+  margin: 6px 0;
+}
+.totals-grand {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0 4px;
+}
+.totals-grand .label {
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+  color: var(--c-text);
+}
+.totals-grand .value {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--c-primary);
+  text-shadow: 0 0 10px rgba(255,214,0,0.3);
+}
+.discount-input-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+}
+.discount-input-row label {
+  font-size: 0.8rem;
+  color: var(--c-text-dim);
+  min-width: 60px;
+}
+.discount-input-row input {
+  flex: 1;
+  background: var(--c-bg-input);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  color: var(--c-text);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+.discount-input-row select {
+  background: var(--c-bg-input);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  padding: 4px 6px;
+  color: var(--c-text);
+  font-size: 0.75rem;
+}
+
+/* ACTION BUTTONS */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+.btn {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  letter-spacing: 2px;
+  transition: all var(--transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-primary {
+  background: var(--c-primary);
+  color: var(--c-bg);
+  box-shadow: 0 4px 15px rgba(255,214,0,0.3);
+}
+.btn-primary:hover {
+  background: var(--c-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255,214,0,0.4);
+}
+.btn-primary:active { transform: translateY(0); }
+.btn-secondary {
+  background: var(--c-bg-elevated);
+  color: var(--c-text-dim);
+  border: 1px solid var(--c-border);
+}
+.btn-secondary:hover { background: var(--c-bg-input); color: var(--c-text); }
+.btn-danger {
+  background: transparent;
+  color: var(--c-danger);
+  border: 1px solid var(--c-danger);
+}
+.btn-danger:hover { background: var(--c-danger); color: white; }
+.btn-small {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+}
+
+/* MULTI-CART TABS */
+.cart-tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+.cart-tab {
+  padding: 5px 14px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: var(--c-bg-elevated);
+  border: 1px solid var(--c-border);
+  border-bottom: none;
+  color: var(--c-text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all var(--transition-fast);
+}
+.cart-tab:hover { color: var(--c-text); }
+.cart-tab.active {
+  background: var(--c-bg-card);
+  color: var(--c-primary);
+  border-color: var(--c-primary);
+  border-bottom: 1px solid var(--c-bg-card);
+  margin-bottom: -1px;
+}
+.cart-tab .close-tab {
+  font-size: 0.7rem;
+  opacity: 0.5;
+  padding: 2px;
+}
+.cart-tab .close-tab:hover { opacity: 1; color: var(--c-danger); }
+.add-cart-btn {
+  padding: 5px 10px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: transparent;
+  border: 1px dashed var(--c-border);
+  border-bottom: none;
+  color: var(--c-text-muted);
+  font-size: 0.8rem;
+  transition: all var(--transition-fast);
+}
+.add-cart-btn:hover { color: var(--c-primary); border-color: var(--c-primary); }
+
+/* ═══════════════════════════════════════════════
+   RIGHT PANEL — THERMAL RECEIPT
+   ═══════════════════════════════════════════════ */
+#receipt-panel {
+  width: 320px;
+  min-width: 320px;
+  background: var(--c-bg-card);
+  border-left: 1px solid var(--c-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.receipt-toolbar {
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--c-border);
+  background: var(--c-bg-elevated);
+}
+.receipt-toolbar .btn { font-size: 0.75rem; padding: 6px 10px; }
+.receipt-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+/* THERMAL RECEIPT STYLES */
+.receipt {
+  width: 260px;
+  background: #fefefe;
+  color: #111;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  padding: 20px 12px;
+  border-radius: 2px;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+  position: relative;
+  line-height: 1.5;
+}
+.receipt::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background: linear-gradient(135deg, transparent 33.33%, #fefefe 33.33%, #fefefe 66.67%, transparent 66.67%);
+  background-size: 10px 10px;
+}
+.receipt::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background: linear-gradient(-45deg, transparent 33.33%, #fefefe 33.33%, #fefefe 66.67%, transparent 66.67%);
+  background-size: 10px 10px;
+}
+.receipt-center { text-align: center; }
+.receipt-store-name {
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  letter-spacing: 3px;
+  color: #111;
+  margin-bottom: 2px;
+}
+.receipt-store-detail {
+  font-size: 0.6rem;
+  color: #555;
+  line-height: 1.4;
+}
+.receipt-divider {
+  border: none;
+  border-top: 1px dashed #ccc;
+  margin: 8px 0;
+}
+.receipt-double-divider {
+  border: none;
+  border-top: 2px double #ccc;
+  margin: 8px 0;
+}
+.receipt-row {
+  display: flex;
+  justify-content: space-between;
+}
+.receipt-item-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 0;
+}
+.receipt-item-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 8px;
+}
+.receipt-item-total { font-weight: 600; white-space: nowrap; }
+.receipt-item-detail {
+  font-size: 0.6rem;
+  color: #888;
+  padding-left: 4px;
+}
+.receipt-total-row {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+}
+.receipt-grand-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 4px 0;
+}
+.receipt-barcode {
+  text-align: center;
+  margin: 10px 0 4px;
+  font-size: 1.8rem;
+  letter-spacing: -2px;
+  line-height: 1;
+  font-family: 'Libre Barcode 39', monospace;
+  color: #111;
+}
+.receipt-barcode-css {
+  display: flex;
+  justify-content: center;
+  gap: 1px;
+  margin: 10px auto;
+  height: 35px;
+}
+.receipt-barcode-css span {
+  display: inline-block;
+  background: #111;
+  height: 100%;
+}
+.receipt-footer {
+  text-align: center;
+  font-size: 0.6rem;
+  color: #888;
+  margin-top: 6px;
+  line-height: 1.6;
+}
+.receipt-thankyou {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  letter-spacing: 2px;
+  margin-top: 6px;
+  color: #111;
+}
+
+/* ═══════════════════════════════════════════════
+   MODALS — NATIVE DIALOG
+   ═══════════════════════════════════════════════ */
+dialog {
+  border: none;
+  border-radius: var(--radius-lg);
+  background: var(--c-bg-card);
+  color: var(--c-text);
+  padding: 0;
+  max-width: 90vw;
+  max-height: 85vh;
+  box-shadow: var(--shadow-lg);
+  animation: scaleIn var(--transition-normal);
+}
+dialog::backdrop {
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--c-border);
+}
+.modal-title {
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  letter-spacing: 2px;
+  color: var(--c-primary);
+}
+.modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--c-bg-elevated);
+  color: var(--c-text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: all var(--transition-fast);
+}
+.modal-close:hover { background: var(--c-danger); color: white; }
+.modal-body { padding: 20px; overflow-y: auto; max-height: 60vh; }
+.modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--c-border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ═══════════════════════════════════════════════
+   PAYMENT MODAL
+   ═══════════════════════════════════════════════ */
+.pay-total-display {
+  text-align: center;
+  padding: 20px;
+  background: linear-gradient(135deg, var(--c-bg-elevated), var(--c-bg));
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+}
+.pay-total-label {
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  color: var(--c-text-dim);
+}
+.pay-total-amount {
+  font-family: var(--font-mono);
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--c-primary);
+  text-shadow: 0 0 20px rgba(255,214,0,0.4);
+}
+.pay-methods {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.pay-method-btn {
+  padding: 14px 8px;
+  border-radius: var(--radius-md);
+  background: var(--c-bg-elevated);
+  border: 2px solid var(--c-border);
+  color: var(--c-text-dim);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: all var(--transition-fast);
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+}
+.pay-method-btn .icon { font-size: 1.5rem; }
+.pay-method-btn:hover { border-color: var(--c-primary); color: var(--c-text); }
+.pay-method-btn.active {
+  border-color: var(--c-primary);
+  background: var(--c-primary-dim);
+  color: var(--c-primary);
+}
+.pay-method-btn.active[data-method="cash"] { border-color: var(--c-success); background: rgba(0,230,118,0.1); color: var(--c-success); }
+.pay-method-btn.active[data-method="upi"] { border-color: var(--c-upi); background: rgba(92,61,199,0.1); color: var(--c-upi); }
+.pay-method-btn.active[data-method="card"] { border-color: var(--c-card); background: rgba(21,101,192,0.1); color: var(--c-card); }
+.pay-method-btn.active[data-method="wallet"] { border-color: var(--c-wallet); background: rgba(255,111,0,0.1); color: var(--c-wallet); }
+.cash-section {
+  display: none;
+  gap: 10px;
+  padding: 12px;
+  background: var(--c-bg-elevated);
+  border-radius: var(--radius-md);
+  margin-top: 10px;
+}
+.cash-section.show { display: flex; flex-direction: column; }
+.cash-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cash-input-group label {
+  min-width: 120px;
+  font-size: 0.85rem;
+  color: var(--c-text-dim);
+}
+.cash-input-group input {
+  flex: 1;
+  background: var(--c-bg-input);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--c-text);
+}
+.cash-quick-btns {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.cash-quick-btn {
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--c-bg-input);
+  border: 1px solid var(--c-border);
+  color: var(--c-text);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  transition: all var(--transition-fast);
+}
+.cash-quick-btn:hover { background: var(--c-primary); color: var(--c-bg); border-color: var(--c-primary); }
+.change-display {
+  text-align: center;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.change-display.positive { background: rgba(0,230,118,0.1); color: var(--c-success); }
+.change-display.negative { background: rgba(255,82,82,0.1); color: var(--c-danger); }
+.change-display.zero { background: var(--c-bg-input); color: var(--c-text-dim); }
+
+/* ═══════════════════════════════════════════════
+   PRODUCT BROWSER MODAL
+   ═══════════════════════════════════════════════ */
+#product-browser { width: 800px; }
+.browser-search {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.browser-search input {
+  flex: 1;
+  background: var(--c-bg-input);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  color: var(--c-text);
+  font-size: 0.85rem;
+}
+.category-filters {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.cat-filter-btn {
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--c-bg-elevated);
+  border: 1px solid var(--c-border);
+  color: var(--c-text-dim);
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  transition: all var(--transition-fast);
+}
+.cat-filter-btn:hover { border-color: var(--c-primary); color: var(--c-text); }
+.cat-filter-btn.active { background: var(--c-primary); color: var(--c-bg); border-color: var(--c-primary); }
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+.product-card {
+  background: var(--c-bg-elevated);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.product-card:hover {
+  border-color: var(--c-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
+.product-card:active { animation: cartAdd 200ms; }
+.product-card-name {
+  font-weight: 600;
+  font-size: 0.8rem;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.product-card-cat {
+  font-size: 0.6rem;
+  color: var(--c-text-muted);
+  font-family: var(--font-mono);
+}
+.product-card-price {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--c-primary);
+  font-size: 0.95rem;
+}
+.product-card-stock {
+  font-size: 0.6rem;
+  font-family: var(--font-mono);
+}
+.product-card-stock.low { color: var(--c-danger); }
+.product-card-stock.ok { color: var(--c-success); }
+.product-card-add {
+  margin-top: auto;
+  padding: 4px;
+  text-align: center;
+  font-family: var(--font-heading);
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  color: var(--c-primary);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+.product-card:hover .product-card-add { opacity: 1; }
+
+/* ═══════════════════════════════════════════════
+   DASHBOARD VIEW
+   ═══════════════════════════════════════════════ */
+.view-container { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+.view-container.active { display: flex; }
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 0 0 12px;
+}
+.stat-card {
+  background: var(--c-bg-card);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+.stat-card.revenue::before { background: var(--c-primary); }
+.stat-card.orders::before { background: var(--c-success); }
+.stat-card.avg::before { background: var(--c-info); }
+.stat-card.profit::before { background: var(--c-upi); }
+.stat-label {
+  font-size: 0.7rem;
+  color: var(--c-text-muted);
+  font-family: var(--font-heading);
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+}
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--c-text);
+}
+.stat-sub {
+  font-size: 0.7rem;
+  color: var(--c-text-dim);
+  font-family: var(--font-mono);
+  margin-top: 4px;
+}
+.dashboard-scroll {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 12px;
+}
+.chart-card {
+  background: var(--c-bg-card);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+.chart-title {
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  letter-spacing: 1.5px;
+  color: var(--c-text-dim);
+  margin-bottom: 12px;
+}
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 120px;
+  padding-top: 10px;
+}
+.bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  justify-content: flex-end;
+}
+.bar {
+  width: 100%;
+  background: linear-gradient(to top, var(--c-primary), var(--c-primary-hover));
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  min-height: 4px;
+  transition: height var(--transition-slow);
+  position: relative;
+}
+.bar:hover { opacity: 0.8; }
+.bar-label {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  color: var(--c-text-muted);
+  text-align: center;
+}
+.bar-value {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  color: var(--c-text-dim);
+}
+.top-products-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.top-product-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--c-bg-elevated);
+}
+.top-product-rank {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  color: var(--c-primary);
+  width: 24px;
+  text-align: center;
+}
+.top-product-name { flex: 1; font-size: 0.8rem; }
+.top-product-qty {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--c-text-dim);
+}
+.top-product-rev {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--c-primary);
+}
+
+/* ═══════════════════════════════════════════════
+   INVENTORY VIEW
+   ═══════════════════════════════════════════════ */
+.inv-toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.inv-toolbar input, .inv-toolbar select {
+  background: var(--c-bg-input);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  color: var(--c-text);
+  font-size: 0.8rem;
+}
+.inv-toolbar input { flex: 1; min-width: 200px; }
+.inv-table-wrap {
+  flex: 1;
+  overflow: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--c-border);
+}
+.inv-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+.inv-table th {
+  background: var(--c-bg-elevated);
+  padding: 8px 10px;
+  text-align: left;
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  letter-spacing: 1.5px;
+  color: var(--c-text-dim);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.inv-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--c-border);
+}
+.inv-table tr:hover { background: var(--c-bg-elevated); }
+.stock-badge {
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+.stock-badge.critical { background: rgba(255,82,82,0.15); color: var(--c-danger); }
+.stock-badge.low { background: rgba(255,167,38,0.15); color: var(--c-warning); }
+.stock-badge.ok { background: rgba(0,230,118,0.15); color: var(--c-success); }
+
+/* ═══════════════════════════════════════════════
+   LOGIN SCREEN
+   ═══════════════════════════════════════════════ */
+#login-screen {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #111 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.login-card {
+  width: 360px;
+  background: var(--c-bg-card);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-xl);
+  padding: 40px 32px;
+  box-shadow: var(--shadow-lg);
+  animation: scaleIn var(--transition-slow);
+  position: relative;
+  overflow: hidden;
+}
+.login-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--c-primary), var(--c-primary-hover), var(--c-primary));
+}
+.login-logo {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.login-logo-text {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  color: var(--c-primary);
+  letter-spacing: 5px;
+  text-shadow: 0 0 30px rgba(255,214,0,0.3);
+}
+.login-logo-sub {
+  font-size: 0.75rem;
+  color: var(--c-text-muted);
+  letter-spacing: 3px;
+  font-family: var(--font-heading);
+}
+.login-field {
+  margin-bottom: 16px;
+}
+.login-field label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--c-text-dim);
+  margin-bottom: 6px;
+  font-family: var(--font-heading);
+  letter-spacing: 1px;
+}
+.login-field input, .login-field select {
+  width: 100%;
+  background: var(--c-bg-input);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  color: var(--c-text);
+  font-size: 0.9rem;
+  transition: border-color var(--transition-fast);
+}
+.login-field input:focus, .login-field select:focus {
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 3px var(--c-primary-dim);
+}
+.login-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: var(--c-primary);
+  color: var(--c-bg);
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  letter-spacing: 3px;
+  margin-top: 8px;
+  transition: all var(--transition-normal);
+}
+.login-btn:hover {
+  background: var(--c-primary-hover);
+  box-shadow: 0 0 30px rgba(255,214,0,0.4);
+  transform: translateY(-1px);
+}
+
+/* ═══════════════════════════════════════════════
+   TOASTS
+   ═══════════════════════════════════════════════ */
+#toast-container {
+  position: fixed;
+  top: 70px;
+  right: 16px;
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  background: var(--c-bg-card);
+  border: 1px solid var(--c-border);
+  box-shadow: var(--shadow-md);
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: toastIn var(--transition-normal);
+  pointer-events: auto;
+  min-width: 250px;
+  max-width: 350px;
+}
+.toast.removing { animation: toastOut var(--transition-normal) forwards; }
+.toast-icon { font-size: 1.1rem; }
+.toast.success { border-left: 3px solid var(--c-success); }
+.toast.success .toast-icon { color: var(--c-success); }
+.toast.error { border-left: 3px solid var(--c-danger); }
+.toast.error .toast-icon { color: var(--c-danger); }
+.toast.warning { border-left: 3px solid var(--c-warning); }
+.toast.warning .toast-icon { color: var(--c-warning); }
+.toast.info { border-left: 3px solid var(--c-info); }
+.toast.info .toast-icon { color: var(--c-info); }
+
+/* ═══════════════════════════════════════════════
+   LOYALTY SECTION
+   ═══════════════════════════════════════════════ */
+.loyalty-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--c-bg-card);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-md);
+}
+.loyalty-bar input {
+  flex: 1;
+  background: var(--c-bg-input);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  padding: 5px 10px;
+  color: var(--c-text);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+.loyalty-info {
+  font-size: 0.75rem;
+  color: var(--c-text-dim);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.loyalty-points {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--c-primary);
+}
+
+/* ═══════════════════════════════════════════════
+   COUPON INPUT
+   ═══════════════════════════════════════════════ */
+.coupon-section {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.coupon-section input {
+  flex: 1;
+  background: var(--c-bg-input);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  color: var(--c-text);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+.coupon-section .btn { padding: 4px 10px; font-size: 0.7rem; }
+.coupon-applied {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: rgba(0,230,118,0.1);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  color: var(--c-success);
+}
+
+/* ═══════════════════════════════════════════════
+   PRINT STYLES
+   ═══════════════════════════════════════════════ */
+@media print {
+  body * { visibility: hidden; }
+  #receipt-panel, #receipt-panel * { visibility: visible; }
+  #receipt-panel {
+    position: fixed;
+    top: 0; left: 0;
+    width: 80mm;
+    border: none;
+    background: white;
+  }
+  .receipt {
+    box-shadow: none;
+    width: 100%;
+    padding: 5mm;
+  }
+  .receipt::before, .receipt::after { display: none; }
+  .receipt-toolbar { display: none; }
+  #app-header, #pos-panel, #toast-container, #login-screen,
+  dialog, .receipt-toolbar { display: none !important; }
+}
+
+/* ═══════════════════════════════════════════════
+   SETTINGS PANEL
+   ═══════════════════════════════════════════════ */
+.settings-group {
+  margin-bottom: 16px;
+}
+.settings-group-title {
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  letter-spacing: 1.5px;
+  color: var(--c-primary);
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--c-border);
+}
+.settings-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+.settings-item label { font-size: 0.85rem; color: var(--c-text-dim); }
+.toggle-switch {
+  width: 44px;
+  height: 24px;
+  background: var(--c-bg-input);
+  border-radius: 12px;
+  position: relative;
+  cursor: pointer;
+  border: 1px solid var(--c-border);
+  transition: all var(--transition-fast);
+}
+.toggle-switch.active { background: var(--c-primary); border-color: var(--c-primary); }
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  transition: transform var(--transition-fast);
+}
+.toggle-switch.active::after { transform: translateX(20px); }
+
+/* ═══════════════════════════════════════════════
+   MISC / UTILITIES
+   ═══════════════════════════════════════════════ */
+.hidden { display: none !important; }
+.flex-1 { flex: 1; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-primary { color: var(--c-primary); }
+.text-dim { color: var(--c-text-dim); }
+.text-muted { color: var(--c-text-muted); }
+.mono { font-family: var(--font-mono); }
+.heading { font-family: var(--font-heading); }
+.gap-8 { gap: 8px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-12 { margin-bottom: 12px; }
+.p-12 { padding: 12px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     LOGIN SCREEN
+     ═══════════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-text">SINGH MART</div>
+      <div class="login-logo-sub">POINT OF SALE SYSTEM</div>
+    </div>
+    <div class="login-field">
+      <label>SELECT ROLE</label>
+      <select id="login-role">
+        <option value="cashier">Cashier</option>
+        <option value="admin">Administrator</option>
+      </select>
+    </div>
+    <div class="login-field">
+      <label>CASHIER NAME</label>
+      <input type="text" id="login-name" placeholder="Enter your name" value="Rahul Kumar">
+    </div>
+    <div class="login-field">
+      <label>PIN</label>
+      <input type="password" id="login-pin" placeholder="Enter 4-digit PIN" value="1234" maxlength="4">
+    </div>
+    <button class="login-btn" id="login-btn">LOGIN →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     HEADER BAR
+     ═══════════════════════════════════════════════ -->
+<header id="app-header">
+  <div class="header-brand">
+    <div>
+      <div class="header-logo">SINGH MART</div>
+      <div class="header-details">
+        <span>📍 Plot 42, Sector 15, Gurugram, HR 122001</span>
+        <span>📞 +91 98765-43210 &nbsp; GSTIN: 06AABCS1234B1Z2 &nbsp; FSSAI: 12721009000123</span>
+      </div>
+    </div>
+  </div>
+  <div class="header-center">
+    <div class="header-info-pill">
+      <span class="icon">👤</span>
+      <span>Cashier:</span>
+      <span class="value" id="header-cashier">—</span>
+    </div>
+    <div class="header-info-pill">
+      <span class="icon">🔑</span>
+      <span>Role:</span>
+      <span class="value" id="header-role">—</span>
+    </div>
+    <div class="header-info-pill">
+      <span class="icon">🧾</span>
+      <span>Bill#</span>
+      <span class="value" id="header-bill-no">—</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="header-btn" id="btn-theme" title="Toggle Theme">🌙</button>
+    <button class="header-btn" id="btn-settings" title="Settings">⚙️</button>
+    <button class="header-btn" id="btn-logout" title="Logout">🚪</button>
+    <div>
+      <div id="live-clock">00:00:00</div>
+      <div id="live-date">—</div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════
+     MAIN CONTENT
+     ═══════════════════════════════════════════════ -->
+<main id="app-main">
+
+  <!-- LEFT PANEL: POS -->
+  <section id="pos-panel">
+
+    <!-- NAV TABS -->
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-view="pos">🛒 POS</button>
+      <button class="nav-tab" data-view="dashboard">📊 DASHBOARD</button>
+      <button class="nav-tab" data-view="inventory">📦 INVENTORY</button>
+      <button class="nav-tab" data-view="transactions">📋 TRANSACTIONS</button>
+    </div>
+
+    <!-- POS VIEW -->
+    <div class="view-container active" id="view-pos">
+
+      <!-- Search -->
+      <div class="search-container" style="margin-bottom:8px;">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Search products or scan barcode... (Enter to add)" autocomplete="off">
+        <div id="autocomplete-list"></div>
+        <div class="search-actions">
+          <button class="search-btn" id="btn-browse" title="Browse Products">📦</button>
+          <button class="search-btn" id="btn-voice" title="Voice Search">🎙️</button>
+        </div>
+      </div>
+
+      <!-- Loyalty -->
+      <div class="loyalty-bar">
+        <span>👤</span>
+        <input type="tel" id="loyalty-phone" placeholder="Customer phone (loyalty)" maxlength="10">
+        <div class="loyalty-info" id="loyalty-info" style="display:none;">
+          <span>⭐</span>
+          <span>Points:</span>
+          <span class="loyalty-points" id="loyalty-points">0</span>
+        </div>
+        <button class="btn btn-small btn-secondary" id="btn-loyalty-check">CHECK</button>
+      </div>
+
+      <!-- Multi-cart tabs -->
+      <div class="cart-tabs" id="cart-tabs">
+        <button class="cart-tab active" data-cart="0">🛒 Cart 1</button>
+        <button class="add-cart-btn" id="btn-add-cart">＋</button>
+      </div>
+
+      <!-- Cart -->
+      <div class="cart-container" id="cart-container">
+        <div class="cart-header-row">
+          <span>#</span>
+          <span>ITEM</span>
+          <span>PRICE</span>
+          <span>QTY</span>
+          <span>TOTAL</span>
+          <span></span>
+        </div>
+        <div class="cart-body" id="cart-body">
+          <div class="cart-empty" id="cart-empty">
+            <div class="cart-empty-icon">🛒</div>
+            <div class="cart-empty-text">Cart is empty</div>
+            <div class="cart-empty-hint">Search products or browse catalog to add items</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Totals -->
+      <div class="totals-section">
+        <div class="totals-row">
+          <span class="label">Items</span>
+          <span class="value" id="total-items">0</span>
+        </div>
+        <div class="totals-row">
+          <span class="label">Subtotal</span>
+          <span class="value" id="total-subtotal">₹0.00</span>
+        </div>
+        <div class="discount-input-row">
+          <label>Discount</label>
+          <input type="number" id="discount-value" placeholder="0" min="0" value="0">
+          <select id="discount-type">
+            <option value="percent">%</option>
+            <option value="flat">₹</option>
+          </select>
+        </div>
+        <div class="coupon-section" style="padding:4px 0;">
+          <input type="text" id="coupon-input" placeholder="Coupon code">
+          <button class="btn btn-small btn-secondary" id="btn-apply-coupon">APPLY</button>
+          <div class="coupon-applied hidden" id="coupon-applied">
+            <span>✅</span>
+            <span id="coupon-applied-text"></span>
+            <button style="background:none;color:var(--c-danger);font-size:0.7rem;" id="btn-remove-coupon">✕</button>
+          </div>
+        </div>
+        <div class="totals-row discount">
+          <span class="label">Discount</span>
+          <span class="value" id="total-discount">-₹0.00</span>
+        </div>
+        <div class="totals-row">
+          <span class="label">GST (5%)</span>
+          <span class="value" id="total-gst">₹0.00</span>
+        </div>
+        <hr class="totals-divider">
+        <div class="totals-grand">
+          <span class="label">GRAND TOTAL</span>
+          <span class="value" id="total-grand">₹0.00</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button class="btn btn-secondary" id="btn-undo">↩ UNDO</button>
+        <button class="btn btn-secondary" id="btn-save-cart">💾 SAVE</button>
+        <button class="btn btn-secondary" id="btn-load-cart">📂 LOAD</button>
+        <button class="btn btn-danger" id="btn-clear-cart">🗑 CLEAR</button>
+        <button class="btn btn-primary" id="btn-pay" style="flex:2;">💳 PROCEED TO PAY</button>
+      </div>
+    </div>
+
+    <!-- DASHBOARD VIEW -->
+    <div class="view-container" id="view-dashboard">
+      <div class="dashboard-grid">
+        <div class="stat-card revenue">
+          <div class="stat-label">TODAY'S REVENUE</div>
+          <div class="stat-value" id="stat-revenue">₹0</div>
+          <div class="stat-sub" id="stat-revenue-sub">0 transactions</div>
+        </div>
+        <div class="stat-card orders">
+          <div class="stat-label">TOTAL ORDERS</div>
+          <div class="stat-value" id="stat-orders">0</div>
+          <div class="stat-sub" id="stat-orders-sub">today</div>
+        </div>
+        <div class="stat-card avg">
+          <div class="stat-label">AVG ORDER VALUE</div>
+          <div class="stat-value" id="stat-avg">₹0</div>
+          <div class="stat-sub" id="stat-avg-sub">—</div>
+        </div>
+        <div class="stat-card profit">
+          <div class="stat-label">EST. PROFIT</div>
+          <div class="stat-value" id="stat-profit">₹0</div>
+          <div class="stat-sub" id="stat-profit-sub">margin</div>
+        </div>
+      </div>
+      <div class="dashboard-scroll">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="chart-card">
+            <div class="chart-title">HOURLY SALES TODAY</div>
+            <div class="bar-chart" id="chart-hourly"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">TOP 5 PRODUCTS</div>
+            <div class="top-products-list" id="top-products"></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="chart-card">
+            <div class="chart-title">CATEGORY REVENUE</div>
+            <div class="bar-chart" id="chart-category"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">WEEKLY TREND</div>
+            <div class="bar-chart" id="chart-weekly"></div>
+          </div>
+        </div>
+        <div class="action-buttons" style="padding:0;">
+          <button class="btn btn-secondary" id="btn-export-report">📥 EXPORT JSON</button>
+          <button class="btn btn-secondary" id="btn-print-report">🖨 PRINT REPORT</button>
+          <button class="btn btn-secondary" id="btn-backup">💾 BACKUP DATA</button>
+          <button class="btn btn-secondary" id="btn-restore">📂 RESTORE DATA</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INVENTORY VIEW -->
+    <div class="view-container" id="view-inventory">
+      <div class="inv-toolbar">
+        <input type="text" id="inv-search" placeholder="Search inventory...">
+        <select id="inv-category-filter">
+          <option value="">All Categories</option>
+        </select>
+        <select id="inv-stock-filter">
+          <option value="">All Stock</option>
+          <option value="low">Low Stock (&lt;10)</option>
+          <option value="critical">Critical (&lt;5)</option>
+          <option value="out">Out of Stock</option>
+        </select>
+        <button class="btn btn-small btn-secondary" id="btn-restock-all">📦 RESTOCK</button>
+        <button class="btn btn-small btn-secondary" id="btn-supplier-market">🏪 SUPPLIER MARKET</button>
+      </div>
+      <div class="inv-table-wrap">
+        <table class="inv-table">
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>PRODUCT</th>
+              <th>CATEGORY</th>
+              <th>PRICE</th>
+              <th>COST</th>
+              <th>MARGIN</th>
+              <th>STOCK</th>
+              <th>STATUS</th>
+              <th>SUPPLIER</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody id="inv-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TRANSACTIONS VIEW -->
+    <div class="view-container" id="view-transactions">
+      <div class="inv-toolbar">
+        <input type="text" id="txn-search" placeholder="Search transactions...">
+        <select id="txn-filter-method">
+          <option value="">All Methods</option>
+          <option value="cash">Cash</option>
+          <option value="upi">UPI</option>
+          <option value="card">Card</option>
+          <option value="wallet">Wallet</option>
+        </select>
+        <input type="date" id="txn-date-filter">
+      </div>
+      <div class="inv-table-wrap">
+        <table class="inv-table">
+          <thead>
+            <tr>
+              <th>BILL #</th>
+              <th>DATE & TIME</th>
+              <th>ITEMS</th>
+              <th>SUBTOTAL</th>
+              <th>DISCOUNT</th>
+              <th>GST</th>
+              <th>TOTAL</th>
+              <th>METHOD</th>
+              <th>CASHIER</th>
+            </tr>
+          </thead>
+          <tbody id="txn-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- RIGHT PANEL: RECEIPT -->
+  <aside id="receipt-panel">
+    <div class="receipt-toolbar">
+      <button class="btn btn-small btn-primary" id="btn-print-receipt">🖨 PRINT</button>
+      <button class="btn btn-small btn-secondary" id="btn-new-bill">📄 NEW BILL</button>
+    </div>
+    <div class="receipt-scroll">
+      <div class="receipt" id="receipt">
+        <div class="receipt-center">
+          <div class="receipt-store-name">SINGH MART</div>
+          <div class="receipt-store-detail">
+            LONDON BRIDGE ROAD, BESIDE METRO STATION <br>
+            Ph: +91 98765-43210<br>
+            GSTIN: 06AABCS1234B1Z2<br>
+            FSSAI: 12721009000123
+          </div>
+        </div>
+        <hr class="receipt-double-divider">
+        <div class="receipt-row">
+          <span>Bill# <strong id="r-bill-no">SM-0001</strong></span>
+          <span id="r-date">—</span>
+        </div>
+        <div class="receipt-row">
+          <span>Cashier: <span id="r-cashier">—</span></span>
+          <span id="r-time">—</span>
+        </div>
+        <hr class="receipt-divider">
+        <div class="receipt-row" style="font-weight:600;">
+          <span>ITEM</span>
+          <span>TOTAL</span>
+        </div>
+        <hr class="receipt-divider">
+        <div id="r-items">
+          <div class="receipt-center" style="padding:20px 0;color:#aaa;font-size:0.65rem;">No items</div>
+        </div>
+        <hr class="receipt-divider">
+        <div class="receipt-total-row">
+          <span>Subtotal</span>
+          <span id="r-subtotal">₹0.00</span>
+        </div>
+        <div class="receipt-total-row" style="color:#888;">
+          <span>Discount</span>
+          <span id="r-discount">-₹0.00</span>
+        </div>
+        <div class="receipt-total-row" style="color:#888;">
+          <span>GST (5%)</span>
+          <span id="r-gst">₹0.00</span>
+        </div>
+        <hr class="receipt-double-divider">
+        <div class="receipt-grand-total">
+          <span>TOTAL</span>
+          <span id="r-total">₹0.00</span>
+        </div>
+        <hr class="receipt-divider">
+        <div id="r-payment-info" style="display:none;">
+          <div class="receipt-row">
+            <span>Payment</span>
+            <span id="r-pay-method">—</span>
+          </div>
+          <div class="receipt-row" id="r-cash-row" style="display:none;">
+            <span>Cash Tendered</span>
+            <span id="r-cash-tendered">—</span>
+          </div>
+          <div class="receipt-row" id="r-change-row" style="display:none;">
+            <span>Change</span>
+            <span id="r-change">—</span>
+          </div>
+          <hr class="receipt-divider">
+        </div>
+        <div class="receipt-barcode-css" id="r-barcode"></div>
+        <div class="receipt-center" style="font-size:0.55rem;color:#aaa;" id="r-barcode-text">SM-0001</div>
+        <hr class="receipt-divider">
+        <div class="receipt-footer">
+          Items once sold will not be taken back or exchanged.<br>
+          E. & O.E.<br>
+          * Subject to Gurugram Jurisdiction *
+        </div>
+        <div class="receipt-center">
+          <div class="receipt-thankyou">THANK YOU VISIT AGAIN!</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<!-- ═══════════════════════════════════════════════
+     MODALS
+     ═══════════════════════════════════════════════ -->
+
+<!-- Payment Modal -->
+<dialog id="payment-modal">
+  <div class="modal-header">
+    <span class="modal-title">💳 PAYMENT</span>
+    <button class="modal-close" id="close-payment">✕</button>
+  </div>
+  <div class="modal-body" style="min-width:480px;">
+    <div class="pay-total-display">
+      <div class="pay-total-label">AMOUNT DUE</div>
+      <div class="pay-total-amount" id="pay-total">₹0.00</div>
+    </div>
+    <div class="pay-methods">
+      <button class="pay-method-btn active" data-method="cash">
+        <span class="icon">💵</span>
+        CASH
+      </button>
+      <button class="pay-method-btn" data-method="upi">
+        <span class="icon">📱</span>
+        UPI
+      </button>
+      <button class="pay-method-btn" data-method="card">
+        <span class="icon">💳</span>
+        CARD
+      </button>
+      <button class="pay-method-btn" data-method="wallet">
+        <span class="icon">👛</span>
+        WALLET
+      </button>
+    </div>
+    <div class="cash-section show" id="cash-section">
+      <div class="cash-input-group">
+        <label>Cash Tendered (₹)</label>
+        <input type="number" id="cash-tendered" placeholder="0" min="0">
+      </div>
+      <div class="cash-quick-btns">
+        <button class="cash-quick-btn" data-amount="exact">Exact</button>
+        <button class="cash-quick-btn" data-amount="50">₹50</button>
+        <button class="cash-quick-btn" data-amount="100">₹100</button>
+        <button class="cash-quick-btn" data-amount="200">₹200</button>
+        <button class="cash-quick-btn" data-amount="500">₹500</button>
+        <button class="cash-quick-btn" data-amount="1000">₹1000</button>
+        <button class="cash-quick-btn" data-amount="2000">₹2000</button>
+      </div>
+      <div class="change-display zero" id="change-display">
+        Change: ₹0.00
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" id="cancel-payment">CANCEL</button>
+    <button class="btn btn-primary" id="confirm-payment" style="min-width:160px;">✅ CONFIRM PAYMENT</button>
+  </div>
+</dialog>
+
+<!-- Product Browser Modal -->
+<dialog id="product-browser">
+  <div class="modal-header">
+    <span class="modal-title">📦 PRODUCT CATALOG</span>
+    <button class="modal-close" id="close-browser">✕</button>
+  </div>
+  <div class="modal-body">
+    <div class="browser-search">
+      <input type="text" id="browser-search-input" placeholder="Search products...">
+    </div>
+    <div class="category-filters" id="category-filters"></div>
+    <div class="products-grid" id="products-grid"></div>
+  </div>
+</dialog>
+
+<!-- Settings Modal -->
+<dialog id="settings-modal">
+  <div class="modal-header">
+    <span class="modal-title">⚙️ SETTINGS</span>
+    <button class="modal-close" id="close-settings">✕</button>
+  </div>
+  <div class="modal-body" style="min-width:400px;">
+    <div class="settings-group">
+      <div class="settings-group-title">APPEARANCE</div>
+      <div class="settings-item">
+        <label>Dark Mode</label>
+        <div class="toggle-switch active" id="toggle-dark-mode"></div>
+      </div>
+      <div class="settings-item">
+        <label>Sound Effects</label>
+        <div class="toggle-switch active" id="toggle-sound"></div>
+      </div>
+    </div>
+    <div class="settings-group">
+      <div class="settings-group-title">STORE</div>
+      <div class="settings-item">
+        <label>GST Rate</label>
+        <input type="number" id="setting-gst" value="5" min="0" max="28" style="width:60px;background:var(--c-bg-input);border:1px solid var(--c-border);border-radius:var(--radius-sm);padding:4px 8px;color:var(--c-text);font-family:var(--font-mono);">
+        <span class="text-dim">%</span>
+      </div>
+    </div>
+    <div class="settings-group">
+      <div class="settings-group-title">DATA</div>
+      <div class="action-buttons">
+        <button class="btn btn-small btn-secondary" id="btn-backup-settings">💾 BACKUP</button>
+        <button class="btn btn-small btn-secondary" id="btn-restore-settings">📂 RESTORE</button>
+        <button class="btn btn-small btn-danger" id="btn-clear-data">🗑 CLEAR ALL</button>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<!-- Saved Carts Modal -->
+<dialog id="saved-carts-modal">
+  <div class="modal-header">
+    <span class="modal-title">📂 SAVED CARTS</span>
+    <button class="modal-close" id="close-saved-carts">✕</button>
+  </div>
+  <div class="modal-body" style="min-width:400px;">
+    <div id="saved-carts-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+  </div>
+</dialog>
+
+<!-- Restock Modal -->
+<dialog id="restock-modal">
+  <div class="modal-header">
+    <span class="modal-title">📦 RESTOCK ITEM</span>
+    <button class="modal-close" id="close-restock">✕</button>
+  </div>
+  <div class="modal-body" style="min-width:360px;">
+    <div class="login-field">
+      <label>PRODUCT</label>
+      <input type="text" id="restock-product" readonly>
+    </div>
+    <div class="login-field">
+      <label>CURRENT STOCK</label>
+      <input type="number" id="restock-current" readonly>
+    </div>
+    <div class="login-field">
+      <label>ADD QUANTITY</label>
+      <input type="number" id="restock-qty" placeholder="0" min="1" value="50">
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" id="cancel-restock">CANCEL</button>
+    <button class="btn btn-primary" id="confirm-restock">📦 RESTOCK</button>
+  </div>
+</dialog>
+
+<!-- Supplier Market Modal -->
+<dialog id="supplier-modal">
+  <div class="modal-header">
+    <span class="modal-title">🏪 SUPPLIER MARKETPLACE</span>
+    <button class="modal-close" id="close-supplier">✕</button>
+  </div>
+  <div class="modal-body" style="min-width:600px;">
+    <div class="browser-search">
+      <input type="text" id="supplier-search" placeholder="Search suppliers...">
+    </div>
+    <div class="inv-table-wrap" style="max-height:400px;">
+      <table class="inv-table">
+        <thead>
+          <tr>
+            <th>SUPPLIER</th>
+            <th>PRODUCT</th>
+            <th>COST</th>
+            <th>MIN QTY</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody id="supplier-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</dialog>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<!-- Hidden file input for restore -->
+<input type="file" id="file-restore" accept=".json" style="display:none;">
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   SINGH MART — POINT OF SALE SYSTEM
+   Complete POS Application for Indian Supermarket
+   ═══════════════════════════════════════════════════════════════ */
+
+// ═══════════════════════════════════════════════
+// PRODUCT DATABASE — 160+ PRODUCTS
+// ═══════════════════════════════════════════════
+const PRODUCTS_DATA = [
+  // === VEGETABLES ===
+  { id:1, name:"Onion (1 kg)", cat:"Vegetables", price:40, stock:200, sku:"VEG001", supplier:"Fresh Farms", cost:28, margin:30 },
+  { id:2, name:"Tomato (1 kg)", cat:"Vegetables", price:35, stock:180, sku:"VEG002", supplier:"Fresh Farms", cost:22, margin:37 },
+  { id:3, name:"Potato (1 kg)", cat:"Vegetables", price:30, stock:250, sku:"VEG003", supplier:"Agri Harvest", cost:18, margin:40 },
+  { id:4, name:"Green Chilli (250g)", cat:"Vegetables", price:20, stock:100, sku:"VEG004", supplier:"Fresh Farms", cost:12, margin:40 },
+  { id:5, name:"Ginger (250g)", cat:"Vegetables", price:35, stock:80, sku:"VEG005", supplier:"Fresh Farms", cost:22, margin:37 },
+  { id:6, name:"Garlic (250g)", cat:"Vegetables", price:45, stock:90, sku:"VEG006", supplier:"Agri Harvest", cost:30, margin:33 },
+  { id:7, name:"Capsicum Green (250g)", cat:"Vegetables", price:30, stock:70, sku:"VEG007", supplier:"Fresh Farms", cost:18, margin:40 },
+  { id:8, name:"Carrot (500g)", cat:"Vegetables", price:35, stock:120, sku:"VEG008", supplier:"Agri Harvest", cost:20, margin:43 },
+  { id:9, name:"Palak Spinach (Bunch)", cat:"Vegetables", price:25, stock:60, sku:"VEG009", supplier:"Fresh Farms", cost:12, margin:52 },
+  { id:10, name:"Cauliflower (1 pc)", cat:"Vegetables", price:40, stock:50, sku:"VEG010", supplier:"Agri Harvest", cost:25, margin:38 },
+
+  // === FRUITS ===
+  { id:11, name:"Apple Shimla (1 kg)", cat:"Fruits", price:180, stock:80, sku:"FRT001", supplier:"Hill Fresh", cost:120, margin:33 },
+  { id:12, name:"Banana (1 dozen)", cat:"Fruits", price:50, stock:150, sku:"FRT002", supplier:"Tropical Farms", cost:30, margin:40 },
+  { id:13, name:"Mango Alphonso (1 kg)", cat:"Fruits", price:350, stock:40, sku:"FRT003", supplier:"Konkan Fresh", cost:250, margin:29 },
+  { id:14, name:"Papaya (1 kg)", cat:"Fruits", price:45, stock:60, sku:"FRT004", supplier:"Tropical Farms", cost:25, margin:44 },
+  { id:15, name:"Watermelon (1 kg)", cat:"Fruits", price:25, stock:40, sku:"FRT005", supplier:"Tropical Farms", cost:12, margin:52 },
+  { id:16, name:"Orange Nagpur (1 kg)", cat:"Fruits", price:80, stock:70, sku:"FRT006", supplier:"Hill Fresh", cost:50, margin:38 },
+  { id:17, name:"Pomegranate (500g)", cat:"Fruits", price:120, stock:50, sku:"FRT007", supplier:"Hill Fresh", cost:80, margin:33 },
+  { id:18, name:"Guava (500g)", cat:"Fruits", price:40, stock:90, sku:"FRT008", supplier:"Tropical Farms", cost:22, margin:45 },
+
+  // === DAIRY & EGGS ===
+  { id:19, name:"Amul Toned Milk (1L)", cat:"Dairy & Eggs", price:54, stock:100, sku:"DRY001", supplier:"Amul", cost:46, margin:15 },
+  { id:20, name:"Amul Gold Milk (500ml)", cat:"Dairy & Eggs", price:32, stock:120, sku:"DRY002", supplier:"Amul", cost:27, margin:16 },
+  { id:21, name:"Mother Dairy Curd (400g)", cat:"Dairy & Eggs", price:35, stock:80, sku:"DRY003", supplier:"Mother Dairy", cost:26, margin:26 },
+  { id:22, name:"Amul Butter (100g)", cat:"Dairy & Eggs", price:56, stock:90, sku:"DRY004", supplier:"Amul", cost:42, margin:25 },
+  { id:23, name:"Amul Cheese Slice (10pc)", cat:"Dairy & Eggs", price:150, stock:60, sku:"DRY005", supplier:"Amul", cost:110, margin:27 },
+  { id:24, name:"Paneer Fresh (200g)", cat:"Dairy & Eggs", price:80, stock:50, sku:"DRY006", supplier:"Mother Dairy", cost:55, margin:31 },
+  { id:25, name:"Farm Eggs (12 pc)", cat:"Dairy & Eggs", price:84, stock:70, sku:"DRY007", supplier:"Eggoz", cost:60, margin:29 },
+  { id:26, name:"Amul Ghee (500ml)", cat:"Dairy & Eggs", price:295, stock:40, sku:"DRY008", supplier:"Amul", cost:230, margin:22 },
+  { id:27, name:"Nestle Slim Milk (1L)", cat:"Dairy & Eggs", price:68, stock:45, sku:"DRY009", supplier:"Nestle", cost:52, margin:24 },
+
+  // === FOODGRAINS & OIL ===
+  { id:28, name:"Aashirvaad Atta (5 kg)", cat:"Foodgrains & Oil", price:280, stock:60, sku:"GRN001", supplier:"ITC", cost:210, margin:25 },
+  { id:29, name:"India Gate Basmati (5kg)", cat:"Foodgrains & Oil", price:550, stock:40, sku:"GRN002", supplier:"KRBL", cost:420, margin:24 },
+  { id:30, name:"Toor Dal (1 kg)", cat:"Foodgrains & Oil", price:145, stock:80, sku:"GRN003", supplier:"Agri Harvest", cost:105, margin:28 },
+  { id:31, name:"Moong Dal (1 kg)", cat:"Foodgrains & Oil", price:135, stock:70, sku:"GRN004", supplier:"Agri Harvest", cost:95, margin:30 },
+  { id:32, name:"Chana Dal (1 kg)", cat:"Foodgrains & Oil", price:95, stock:90, sku:"GRN005", supplier:"Agri Harvest", cost:65, margin:32 },
+  { id:33, name:"Fortune Sunflower Oil (1L)", cat:"Foodgrains & Oil", price:155, stock:60, sku:"GRN006", supplier:"Adani Wilmar", cost:115, margin:26 },
+  { id:34, name:"Saffola Gold Oil (1L)", cat:"Foodgrains & Oil", price:195, stock:50, sku:"GRN007", supplier:"Marico", cost:145, margin:26 },
+  { id:35, name:"Fortune Mustard Oil (1L)", cat:"Foodgrains & Oil", price:175, stock:55, sku:"GRN008", supplier:"Adani Wilmar", cost:130, margin:26 },
+  { id:36, name:"Sugar (1 kg)", cat:"Foodgrains & Oil", price:48, stock:150, sku:"GRN009", supplier:"Dhampur", cost:35, margin:27 },
+  { id:37, name:"Salt Tata (1 kg)", cat:"Foodgrains & Oil", price:24, stock:200, sku:"GRN010", supplier:"Tata", cost:16, margin:33 },
+
+  // === SNACKS & INSTANT ===
+  { id:38, name:"Lays Classic Salted (52g)", cat:"Snacks & Instant", price:20, stock:200, sku:"SNK001", supplier:"PepsiCo", cost:14, margin:30 },
+  { id:39, name:"Kurkure Masala (90g)", cat:"Snacks & Instant", price:20, stock:180, sku:"SNK002", supplier:"PepsiCo", cost:14, margin:30 },
+  { id:40, name:"Haldiram Bhujia (200g)", cat:"Snacks & Instant", price:60, stock:100, sku:"SNK003", supplier:"Haldiram", cost:42, margin:30 },
+  { id:41, name:"Parle-G Biscuit (800g)", cat:"Snacks & Instant", price:65, stock:120, sku:"SNK004", supplier:"Parle", cost:48, margin:26 },
+  { id:42, name:"Britannia Good Day (250g)", cat:"Snacks & Instant", price:45, stock:90, sku:"SNK005", supplier:"Britannia", cost:32, margin:29 },
+  { id:43, name:"Maggi Noodles (70g x 4)", cat:"Snacks & Instant", price:56, stock:150, sku:"SNK006", supplier:"Nestle", cost:42, margin:25 },
+  { id:44, name:"Cup Noodles (70g)", cat:"Snacks & Instant", price:45, stock:80, sku:"SNK007", supplier:"Nissin", cost:32, margin:29 },
+  { id:45, name:"Bingo Mad Angles (66g)", cat:"Snacks & Instant", price:20, stock:160, sku:"SNK008", supplier:"ITC", cost:14, margin:30 },
+  { id:46, name:"Act II Popcorn (70g)", cat:"Snacks & Instant", price:40, stock:70, sku:"SNK009", supplier:"ConAgra", cost:28, margin:30 },
+  { id:47, name:"Oreo Biscuit (120g)", cat:"Snacks & Instant", price:30, stock:130, sku:"SNK010", supplier:"Cadbury", cost:22, margin:27 },
+
+  // === BEVERAGES ===
+  { id:48, name:"Coca-Cola (750ml)", cat:"Beverages", price:38, stock:120, sku:"BEV001", supplier:"Coca-Cola", cost:28, margin:26 },
+  { id:49, name:"Pepsi (750ml)", cat:"Beverages", price:38, stock:110, sku:"BEV002", supplier:"PepsiCo", cost:28, margin:26 },
+  { id:50, name:"Thums Up (750ml)", cat:"Beverages", price:38, stock:100, sku:"BEV003", supplier:"Coca-Cola", cost:28, margin:26 },
+  { id:51, name:"Sprite (750ml)", cat:"Beverages", price:38, stock:90, sku:"BEV004", supplier:"Coca-Cola", cost:28, margin:26 },
+  { id:52, name:"Maaza Mango (600ml)", cat:"Beverages", price:30, stock:80, sku:"BEV005", supplier:"Coca-Cola", cost:20, margin:33 },
+  { id:53, name:"Real Juice Mixed (1L)", cat:"Beverages", price:99, stock:60, sku:"BEV006", supplier:"Dabur", cost:72, margin:27 },
+  { id:54, name:"Paper Boat Aam Panna", cat:"Beverages", price:30, stock:70, sku:"BEV007", supplier:"Hector Bev.", cost:20, margin:33 },
+  { id:55, name:"Bisleri Water (1L)", cat:"Beverages", price:22, stock:200, sku:"BEV008", supplier:"Bisleri", cost:12, margin:45 },
+  { id:56, name:"Red Bull (250ml)", cat:"Beverages", price:125, stock:50, sku:"BEV009", supplier:"Red Bull", cost:95, margin:24 },
+  { id:57, name:"Tata Tea Gold (500g)", cat:"Beverages", price:260, stock:60, sku:"BEV010", supplier:"Tata", cost:195, margin:25 },
+  { id:58, name:"Nescafe Classic (50g)", cat:"Beverages", price:155, stock:50, sku:"BEV011", supplier:"Nestle", cost:115, margin:26 },
+  { id:59, name:"Bru Instant Coffee (50g)", cat:"Beverages", price:125, stock:55, sku:"BEV012", supplier:"HUL", cost:90, margin:28 },
+
+  // === PERSONAL CARE ===
+  { id:60, name:"Dove Soap (100g)", cat:"Personal Care", price:52, stock:100, sku:"PRC001", supplier:"HUL", cost:38, margin:27 },
+  { id:61, name:"Colgate MaxFresh (80g)", cat:"Personal Care", price:52, stock:90, sku:"PRC002", supplier:"Colgate", cost:36, margin:31 },
+  { id:62, name:"Head & Shoulders (180ml)", cat:"Personal Care", price:195, stock:50, sku:"PRC003", supplier:"P&G", cost:140, margin:28 },
+  { id:63, name:"Dettol Handwash (200ml)", cat:"Personal Care", price:65, stock:80, sku:"PRC004", supplier:"Reckitt", cost:45, margin:31 },
+  { id:64, name:"Nivea Body Lotion (200ml)", cat:"Personal Care", price:210, stock:40, sku:"PRC005", supplier:"Nivea", cost:155, margin:26 },
+  { id:65, name:"Gillette Guard Razor", cat:"Personal Care", price:45, stock:60, sku:"PRC006", supplier:"P&G", cost:30, margin:33 },
+  { id:66, name:"Himalaya Face Wash (100ml)", cat:"Personal Care", price:145, stock:55, sku:"PRC007", supplier:"Himalaya", cost:105, margin:28 },
+  { id:67, name:"Parachute Coconut Oil (200ml)", cat:"Personal Care", price:105, stock:70, sku:"PRC008", supplier:"Marico", cost:75, margin:29 },
+  { id:68, name:"Lifebuoy Soap (125g)", cat:"Personal Care", price:36, stock:120, sku:"PRC009", supplier:"HUL", cost:24, margin:33 },
+  { id:69, name:"Whisper Ultra (8 pads)", cat:"Personal Care", price:75, stock:80, sku:"PRC010", supplier:"P&G", cost:52, margin:31 },
+
+  // === HOUSEHOLD ===
+  { id:70, name:"Vim Dishwash Bar (200g)", cat:"Household", price:28, stock:100, sku:"HLD001", supplier:"HUL", cost:18, margin:36 },
+  { id:71, name:"Surf Excel Matic (1 kg)", cat:"Household", price:245, stock:60, sku:"HLD002", supplier:"HUL", cost:180, margin:27 },
+  { id:72, name:"Harpic Toilet (500ml)", cat:"Household", price:85, stock:70, sku:"HLD003", supplier:"Reckitt", cost:60, margin:29 },
+  { id:73, name:"Lizol Floor Cleaner (500ml)", cat:"Household", price:110, stock:55, sku:"HLD004", supplier:"Reckitt", cost:78, margin:29 },
+  { id:74, name:"Colin Glass Cleaner (500ml)", cat:"Household", price:105, stock:50, sku:"HLD005", supplier:"Reckitt", cost:72, margin:31 },
+  { id:75, name:"Good Knight Liquid (45ml)", cat:"Household", price:68, stock:80, sku:"HLD006", supplier:"Godrej", cost:45, margin:34 },
+  { id:76, name:"Hit Cockroach Spray (200ml)", cat:"Household", price:165, stock:40, sku:"HLD007", supplier:"Godrej", cost:120, margin:27 },
+  { id:77, name:"Scotch Brite Scrub Pad", cat:"Household", price:30, stock:100, sku:"HLD008", supplier:"3M", cost:18, margin:40 },
+  { id:78, name:"Garbage Bags (30pc)", cat:"Household", price:85, stock:70, sku:"HLD009", supplier:"Ezee", cost:55, margin:35 },
+
+  // === DRY FRUITS & SEEDS ===
+  { id:79, name:"Almonds California (200g)", cat:"Dry Fruits & Seeds", price:280, stock:40, sku:"DRF001", supplier:"Happilo", cost:200, margin:29 },
+  { id:80, name:"Cashew Whole (200g)", cat:"Dry Fruits & Seeds", price:240, stock:35, sku:"DRF002", supplier:"Happilo", cost:170, margin:29 },
+  { id:81, name:"Raisins Kishmish (200g)", cat:"Dry Fruits & Seeds", price:120, stock:50, sku:"DRF003", supplier:"Happilo", cost:80, margin:33 },
+  { id:82, name:"Chia Seeds (200g)", cat:"Dry Fruits & Seeds", price:180, stock:30, sku:"DRF004", supplier:"True Elements", cost:120, margin:33 },
+  { id:83, name:"Pumpkin Seeds (150g)", cat:"Dry Fruits & Seeds", price:160, stock:35, sku:"DRF005", supplier:"True Elements", cost:105, margin:34 },
+  { id:84, name:"Mixed Nuts Trail Mix (200g)", cat:"Dry Fruits & Seeds", price:320, stock:25, sku:"DRF006", supplier:"Happilo", cost:230, margin:28 },
+  { id:85, name:"Walnuts Akhrot (200g)", cat:"Dry Fruits & Seeds", price:260, stock:30, sku:"DRF007", supplier:"Happilo", cost:185, margin:29 },
+
+  // === FROZEN & RTE ===
+  { id:86, name:"McCain French Fries (450g)", cat:"Frozen & RTE", price:150, stock:40, sku:"FRZ001", supplier:"McCain", cost:105, margin:30 },
+  { id:87, name:"ITC Aashirvaad Paratha (5pc)", cat:"Frozen & RTE", price:120, stock:35, sku:"FRZ002", supplier:"ITC", cost:85, margin:29 },
+  { id:88, name:"Sumeru Frozen Peas (500g)", cat:"Frozen & RTE", price:75, stock:50, sku:"FRZ003", supplier:"Godrej", cost:50, margin:33 },
+  { id:89, name:"MTR Ready Meal Poha", cat:"Frozen & RTE", price:60, stock:45, sku:"FRZ004", supplier:"MTR", cost:40, margin:33 },
+  { id:90, name:"Haldiram Frozen Samosa (12pc)", cat:"Frozen & RTE", price:180, stock:30, sku:"FRZ005", supplier:"Haldiram", cost:125, margin:31 },
+
+  // === CHOCOLATES & CANDIES ===
+  { id:91, name:"Cadbury Dairy Milk (110g)", cat:"Chocolates & Candies", price:99, stock:100, sku:"CHO001", supplier:"Cadbury", cost:72, margin:27 },
+  { id:92, name:"KitKat (36.5g)", cat:"Chocolates & Candies", price:30, stock:120, sku:"CHO002", supplier:"Nestle", cost:22, margin:27 },
+  { id:93, name:"5 Star (40g)", cat:"Chocolates & Candies", price:20, stock:150, sku:"CHO003", supplier:"Cadbury", cost:14, margin:30 },
+  { id:94, name:"Ferrero Rocher (3pc)", cat:"Chocolates & Candies", price:150, stock:40, sku:"CHO004", supplier:"Ferrero", cost:110, margin:27 },
+  { id:95, name:"Snickers (45g)", cat:"Chocolates & Candies", price:40, stock:80, sku:"CHO005", supplier:"Mars", cost:28, margin:30 },
+  { id:96, name:"Gems (17.8g)", cat:"Chocolates & Candies", price:10, stock:200, sku:"CHO006", supplier:"Cadbury", cost:6, margin:40 },
+  { id:97, name:"Mentos Roll", cat:"Chocolates & Candies", price:10, stock:180, sku:"CHO007", supplier:"Perfetti", cost:6, margin:40 },
+  { id:98, name:"Pulse Candy (10pc)", cat:"Chocolates & Candies", price:10, stock:200, sku:"CHO008", supplier:"DS Foods", cost:6, margin:40 },
+  { id:99, name:"Cadbury Silk (65g)", cat:"Chocolates & Candies", price:85, stock:70, sku:"CHO009", supplier:"Cadbury", cost:62, margin:27 },
+  { id:100, name:"Amul Dark Chocolate (150g)", cat:"Chocolates & Candies", price:120, stock:50, sku:"CHO010", supplier:"Amul", cost:85, margin:29 },
+
+  // === SPICES & SAUCES ===
+  { id:101, name:"MDH Chana Masala (100g)", cat:"Spices & Sauces", price:72, stock:80, sku:"SPC001", supplier:"MDH", cost:50, margin:31 },
+  { id:102, name:"Everest Garam Masala (50g)", cat:"Spices & Sauces", price:55, stock:70, sku:"SPC002", supplier:"Everest", cost:38, margin:31 },
+  { id:103, name:"Turmeric Powder (200g)", cat:"Spices & Sauces", price:65, stock:90, sku:"SPC003", supplier:"MDH", cost:42, margin:35 },
+  { id:104, name:"Red Chilli Powder (200g)", cat:"Spices & Sauces", price:75, stock:80, sku:"SPC004", supplier:"Everest", cost:50, margin:33 },
+  { id:105, name:"Maggi Hot & Sweet (500g)", cat:"Spices & Sauces", price:115, stock:55, sku:"SPC005", supplier:"Nestle", cost:82, margin:29 },
+  { id:106, name:"Kissan Tomato Ketchup (500g)", cat:"Spices & Sauces", price:105, stock:65, sku:"SPC006", supplier:"HUL", cost:75, margin:29 },
+  { id:107, name:"Soy Sauce Ching's (200ml)", cat:"Spices & Sauces", price:60, stock:50, sku:"SPC007", supplier:"Capital Foods", cost:40, margin:33 },
+  { id:108, name:"Cumin Powder (100g)", cat:"Spices & Sauces", price:85, stock:60, sku:"SPC008", supplier:"MDH", cost:58, margin:32 },
+
+  // === PASTA & NOODLES ===
+  { id:109, name:"Maggi 2-Min Masala (70g x 12)", cat:"Pasta & Noodles", price:168, stock:60, sku:"PST001", supplier:"Nestle", cost:126, margin:25 },
+  { id:110, name:"Yippee Noodles (70g x 6)", cat:"Pasta & Noodles", price:90, stock:50, sku:"PST002", supplier:"ITC", cost:65, margin:28 },
+  { id:111, name:"Disano Penne Pasta (500g)", cat:"Pasta & Noodles", price:120, stock:40, sku:"PST003", supplier:"Amazon Basics", cost:85, margin:29 },
+  { id:112, name:"Ching's Hakka Noodles (150g)", cat:"Pasta & Noodles", price:45, stock:70, sku:"PST004", supplier:"Capital Foods", cost:30, margin:33 },
+  { id:113, name:"Del Monte Pasta Sauce (400g)", cat:"Pasta & Noodles", price:140, stock:35, sku:"PST005", supplier:"Del Monte", cost:98, margin:30 },
+
+  // === SPREADS & BREAKFAST ===
+  { id:114, name:"Kellogg's Corn Flakes (475g)", cat:"Spreads & Breakfast", price:230, stock:40, sku:"BRK001", supplier:"Kellogg's", cost:170, margin:26 },
+  { id:115, name:"Saffola Oats (500g)", cat:"Spreads & Breakfast", price:135, stock:50, sku:"BRK002", supplier:"Marico", cost:95, margin:30 },
+  { id:116, name:"Nutella Spread (350g)", cat:"Spreads & Breakfast", price:365, stock:30, sku:"BRK003", supplier:"Ferrero", cost:270, margin:26 },
+  { id:117, name:"Kissan Mixed Fruit Jam (500g)", cat:"Spreads & Breakfast", price:140, stock:45, sku:"BRK004", supplier:"HUL", cost:98, margin:30 },
+  { id:118, name:"Peanut Butter Pintola (350g)", cat:"Spreads & Breakfast", price:260, stock:35, sku:"BRK005", supplier:"Pintola", cost:185, margin:29 },
+  { id:119, name:"Honey Dabur (500g)", cat:"Spreads & Breakfast", price:235, stock:40, sku:"BRK006", supplier:"Dabur", cost:170, margin:28 },
+  { id:120, name:"Muesli Yogabar (400g)", cat:"Spreads & Breakfast", price:295, stock:25, sku:"BRK007", supplier:"Yogabar", cost:210, margin:29 },
+
+  // === BABY CARE ===
+  { id:121, name:"Pampers Diaper (Md, 20pc)", cat:"Baby Care", price:430, stock:30, sku:"BBY001", supplier:"P&G", cost:320, margin:26 },
+  { id:122, name:"Johnson's Baby Powder (200g)", cat:"Baby Care", price:195, stock:40, sku:"BBY002", supplier:"J&J", cost:140, margin:28 },
+  { id:123, name:"Cerelac Wheat (300g)", cat:"Baby Care", price:275, stock:35, sku:"BBY003", supplier:"Nestle", cost:200, margin:27 },
+  { id:124, name:"Himalaya Baby Soap (75g)", cat:"Baby Care", price:55, stock:60, sku:"BBY004", supplier:"Himalaya", cost:36, margin:35 },
+  { id:125, name:"Lactogen 1 (400g)", cat:"Baby Care", price:460, stock:20, sku:"BBY005", supplier:"Nestle", cost:350, margin:24 },
+  { id:126, name:"Baby Wipes (72pc)", cat:"Baby Care", price:120, stock:50, sku:"BBY006", supplier:"MamyPoko", cost:82, margin:32 },
+
+  // === PET CARE ===
+  { id:127, name:"Pedigree Adult Dog Food (3kg)", cat:"Pet Care", price:520, stock:20, sku:"PET001", supplier:"Mars", cost:380, margin:27 },
+  { id:128, name:"Whiskas Cat Food (480g)", cat:"Pet Care", price:155, stock:25, sku:"PET002", supplier:"Mars", cost:110, margin:29 },
+  { id:129, name:"Drools Dog Biscuits (800g)", cat:"Pet Care", price:180, stock:20, sku:"PET003", supplier:"Drools", cost:125, margin:31 },
+  { id:130, name:"Me-O Cat Food (1.2 kg)", cat:"Pet Care", price:340, stock:15, sku:"PET004", supplier:"PCG", cost:245, margin:28 },
+
+  // === HEALTH ===
+  { id:131, name:"Crocin Advance (15 tab)", cat:"Health", price:28, stock:100, sku:"HLT001", supplier:"GSK", cost:18, margin:36 },
+  { id:132, name:"Hajmola Tablet (120pc)", cat:"Health", price:50, stock:80, sku:"HLT002", supplier:"Dabur", cost:32, margin:36 },
+  { id:133, name:"ENO Sachet (5g x 6)", cat:"Health", price:42, stock:90, sku:"HLT003", supplier:"GSK", cost:28, margin:33 },
+  { id:134, name:"Vicks Vaporub (25ml)", cat:"Health", price:65, stock:60, sku:"HLT004", supplier:"P&G", cost:44, margin:32 },
+  { id:135, name:"Band-Aid (10pc)", cat:"Health", price:35, stock:80, sku:"HLT005", supplier:"J&J", cost:22, margin:37 },
+  { id:136, name:"Dettol Antiseptic (125ml)", cat:"Health", price:55, stock:70, sku:"HLT006", supplier:"Reckitt", cost:38, margin:31 },
+  { id:137, name:"Chyawanprash Dabur (500g)", cat:"Health", price:220, stock:30, sku:"HLT007", supplier:"Dabur", cost:160, margin:27 },
+  { id:138, name:"Volini Spray (40g)", cat:"Health", price:135, stock:35, sku:"HLT008", supplier:"Sun Pharma", cost:95, margin:30 },
+
+  // === POOJA & STATIONERY ===
+  { id:139, name:"Agarbatti Cycle (120stk)", cat:"Pooja & Stationery", price:55, stock:80, sku:"POJ001", supplier:"NR Group", cost:35, margin:36 },
+  { id:140, name:"Camphor Tablets (50g)", cat:"Pooja & Stationery", price:40, stock:60, sku:"POJ002", supplier:"Mangalam", cost:24, margin:40 },
+  { id:141, name:"Diya Cotton Wicks (100pc)", cat:"Pooja & Stationery", price:20, stock:100, sku:"POJ003", supplier:"Local", cost:10, margin:50 },
+  { id:142, name:"Sindoor Powder (10g)", cat:"Pooja & Stationery", price:15, stock:50, sku:"POJ004", supplier:"Local", cost:6, margin:60 },
+  { id:143, name:"Classmate Notebook (180pg)", cat:"Pooja & Stationery", price:45, stock:80, sku:"POJ005", supplier:"ITC", cost:30, margin:33 },
+  { id:144, name:"Reynolds Pen (5pc)", cat:"Pooja & Stationery", price:50, stock:100, sku:"POJ006", supplier:"Reynolds", cost:30, margin:40 },
+  { id:145, name:"Fevicol (50g)", cat:"Pooja & Stationery", price:22, stock:60, sku:"POJ007", supplier:"Pidilite", cost:12, margin:45 },
+  { id:146, name:"Cello Tape", cat:"Pooja & Stationery", price:15, stock:90, sku:"POJ008", supplier:"Cello", cost:8, margin:47 },
+
+  // === EXTRA PRODUCTS FOR 150+ ===
+  { id:147, name:"Surf Excel Quick Wash (500g)", cat:"Household", price:130, stock:60, sku:"HLD010", supplier:"HUL", cost:95, margin:27 },
+  { id:148, name:"Comfort Fabric Softener (800ml)", cat:"Household", price:195, stock:40, sku:"HLD011", supplier:"HUL", cost:140, margin:28 },
+  { id:149, name:"Ujala Liquid (125ml)", cat:"Household", price:42, stock:70, sku:"HLD012", supplier:"Jyothy Lab", cost:28, margin:33 },
+  { id:150, name:"Madhur Sugar (5 kg)", cat:"Foodgrains & Oil", price:228, stock:50, sku:"GRN011", supplier:"DSCL", cost:175, margin:23 },
+  { id:151, name:"Rajma (1 kg)", cat:"Foodgrains & Oil", price:160, stock:50, sku:"GRN012", supplier:"Agri Harvest", cost:115, margin:28 },
+  { id:152, name:"Poha (500g)", cat:"Foodgrains & Oil", price:42, stock:80, sku:"GRN013", supplier:"Local", cost:26, margin:38 },
+  { id:153, name:"Besan Gram Flour (500g)", cat:"Foodgrains & Oil", price:55, stock:70, sku:"GRN014", supplier:"Agri Harvest", cost:35, margin:36 },
+  { id:154, name:"Cornflour (200g)", cat:"Foodgrains & Oil", price:40, stock:60, sku:"GRN015", supplier:"Brown & Polson", cost:26, margin:35 },
+  { id:155, name:"Sooji Rava (500g)", cat:"Foodgrains & Oil", price:38, stock:90, sku:"GRN016", supplier:"Agri Harvest", cost:24, margin:37 },
+  { id:156, name:"Amul Lassi Mango (200ml)", cat:"Dairy & Eggs", price:25, stock:80, sku:"DRY010", supplier:"Amul", cost:16, margin:36 },
+  { id:157, name:"Yakult Probiotic (5pc)", cat:"Dairy & Eggs", price:90, stock:30, sku:"DRY011", supplier:"Yakult", cost:65, margin:28 },
+  { id:158, name:"Bhindi Lady Finger (250g)", cat:"Vegetables", price:30, stock:60, sku:"VEG011", supplier:"Fresh Farms", cost:18, margin:40 },
+  { id:159, name:"Brinjal Baingan (500g)", cat:"Vegetables", price:25, stock:70, sku:"VEG012", supplier:"Agri Harvest", cost:14, margin:44 },
+  { id:160, name:"Coriander Bunch", cat:"Vegetables", price:10, stock:80, sku:"VEG013", supplier:"Fresh Farms", cost:4, margin:60 },
+  { id:161, name:"Lemon (4 pc)", cat:"Vegetables", price:15, stock:100, sku:"VEG014", supplier:"Fresh Farms", cost:8, margin:47 },
+  { id:162, name:"Cucumber (500g)", cat:"Vegetables", price:20, stock:80, sku:"VEG015", supplier:"Agri Harvest", cost:10, margin:50 },
+];
+
+// ═══════════════════════════════════════════════
+// COUPON CODES
+// ═══════════════════════════════════════════════
+const COUPONS = {
+  'WELCOME10': { type: 'percent', value: 10, minOrder: 200, desc: '10% off (min ₹200)' },
+  'FLAT50': { type: 'flat', value: 50, minOrder: 500, desc: '₹50 off (min ₹500)' },
+  'SUPER20': { type: 'percent', value: 20, minOrder: 1000, desc: '20% off (min ₹1000)' },
+  'DIWALI100': { type: 'flat', value: 100, minOrder: 800, desc: '₹100 off (min ₹800)' },
+  'FRESH5': { type: 'percent', value: 5, minOrder: 100, desc: '5% off (min ₹100)' },
+};
+
+// ═══════════════════════════════════════════════
+// APPLICATION STATE
+// ═══════════════════════════════════════════════
+class AppState {
+  constructor() {
+    this.user = null;
+    this.products = [];
+    this.carts = [[]];
+    this.activeCartIndex = 0;
+    this.transactions = [];
+    this.billCounter = 1;
+    this.undoStack = [];
+    this.savedCarts = [];
+    this.loyaltyDB = {};
+    this.stockHistory = [];
+    this.expenses = [];
+    this.settings = {
+      darkMode: true,
+      soundEnabled: true,
+      gstRate: 5,
+    };
+    this.appliedCoupon = null;
+    this.currentDiscount = { type: 'percent', value: 0 };
+    this.load();
+  }
+
+  get cart() { return this.carts[this.activeCartIndex] || []; }
+  set cart(val) { this.carts[this.activeCartIndex] = val; }
+
+  save() {
+    try {
+      const data = {
+        products: this.products,
+        carts: this.carts,
+        activeCartIndex: this.activeCartIndex,
+        transactions: this.transactions,
+        billCounter: this.billCounter,
+        savedCarts: this.savedCarts,
+        loyaltyDB: this.loyaltyDB,
+        stockHistory: this.stockHistory,
+        expenses: this.expenses,
+        settings: this.settings,
+      };
+      localStorage.setItem('singhmart_data', JSON.stringify(data));
+    } catch(e) { console.warn('Save failed:', e); }
+  }
+
+  load() {
+    try {
+      const raw = localStorage.getItem('singhmart_data');
+      if (raw) {
+        const data = JSON.parse(raw);
+        // Merge saved stock quantities into product database
+        if (data.products && data.products.length > 0) {
+          const stockMap = {};
+          data.products.forEach(p => { stockMap[p.id] = p.stock; });
+          this.products = PRODUCTS_DATA.map(p => ({...p, stock: stockMap[p.id] !== undefined ? stockMap[p.id] : p.stock }));
+        } else {
+          this.products = PRODUCTS_DATA.map(p => ({...p}));
+        }
+        this.carts = data.carts || [[]];
+        this.activeCartIndex = data.activeCartIndex || 0;
+        this.transactions = data.transactions || [];
+        this.billCounter = data.billCounter || 1;
+        this.savedCarts = data.savedCarts || [];
+        this.loyaltyDB = data.loyaltyDB || {};
+        this.stockHistory = data.stockHistory || [];
+        this.expenses = data.expenses || [];
+        this.settings = { ...this.settings, ...(data.settings || {}) };
+      } else {
+        this.products = PRODUCTS_DATA.map(p => ({...p}));
+      }
+    } catch(e) {
+      console.warn('Load failed:', e);
+      this.products = PRODUCTS_DATA.map(p => ({...p}));
+    }
+  }
+
+  getProduct(id) { return this.products.find(p => p.id === id); }
+
+  exportData() {
+    return JSON.stringify({
+      products: this.products,
+      transactions: this.transactions,
+      billCounter: this.billCounter,
+      savedCarts: this.savedCarts,
+      loyaltyDB: this.loyaltyDB,
+      stockHistory: this.stockHistory,
+      expenses: this.expenses,
+      settings: this.settings,
+      exportedAt: new Date().toISOString(),
+    }, null, 2);
+  }
+
+  importData(json) {
+    try {
+      const data = JSON.parse(json);
+      if (data.products) {
+        const stockMap = {};
+        data.products.forEach(p => { stockMap[p.id] = p.stock; });
+        this.products = PRODUCTS_DATA.map(p => ({...p, stock: stockMap[p.id] !== undefined ? stockMap[p.id] : p.stock }));
+      }
+      this.transactions = data.transactions || this.transactions;
+      this.billCounter = data.billCounter || this.billCounter;
+      this.savedCarts = data.savedCarts || this.savedCarts;
+      this.loyaltyDB = data.loyaltyDB || this.loyaltyDB;
+      this.settings = { ...this.settings, ...(data.settings || {}) };
+      this.save();
+      return true;
+    } catch(e) {
+      return false;
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════
+// SOUND MANAGER
+// ═══════════════════════════════════════════════
+class SoundManager {
+  constructor() {
+    this.ctx = null;
+  }
+  init() {
+    try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+  }
+  beep(freq = 800, duration = 0.08) {
+    if (!this.ctx || !state.settings.soundEnabled) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+      osc.start(this.ctx.currentTime);
+      osc.stop(this.ctx.currentTime + duration);
+    } catch(e) {}
+  }
+  scanBeep() { this.beep(1200, 0.06); setTimeout(() => this.beep(1600, 0.06), 60); }
+  errorBeep() { this.beep(300, 0.2); }
+  successBeep() { this.beep(880, 0.08); setTimeout(() => this.beep(1100, 0.1), 100); }
+}
+
+// ═══════════════════════════════════════════════
+// TOAST SYSTEM
+// ═══════════════════════════════════════════════
+class ToastManager {
+  constructor() {
+    this.container = document.getElementById('toast-container');
+  }
+  show(msg, type = 'info', duration = 3000) {
+    const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `<span class="toast-icon">${icons[type]}</span><span>${msg}</span>`;
+    this.container.appendChild(toast);
+    setTimeout(() => {
+      toast.classList.add('removing');
+      setTimeout(() => toast.remove(), 250);
+    }, duration);
+  }
+}
+
+// ═══════════════════════════════════════════════
+// INIT GLOBALS
+// ═══════════════════════════════════════════════
+const state = new AppState();
+const sound = new SoundManager();
+const toast = new ToastManager();
+let acHighlightIndex = -1;
+
+// ═══════════════════════════════════════════════
+// CLOCK
+// ═══════════════════════════════════════════════
+function updateClock() {
+  const now = new Date();
+  document.getElementById('live-clock').textContent = now.toLocaleTimeString('en-IN', { hour12: false });
+  document.getElementById('live-date').textContent = now.toLocaleDateString('en-IN', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ═══════════════════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════════════════
+document.getElementById('login-btn').addEventListener('click', handleLogin);
+document.getElementById('login-pin').addEventListener('keyup', e => { if (e.key === 'Enter') handleLogin(); });
+
+function handleLogin() {
+  const name = document.getElementById('login-name').value.trim();
+  const role = document.getElementById('login-role').value;
+  const pin = document.getElementById('login-pin').value;
+  if (!name) { toast.show('Please enter your name', 'error'); return; }
+  if (pin !== '1234' && pin !== '0000') { toast.show('Invalid PIN! (Try 1234)', 'error'); return; }
+  state.user = { name, role };
+  document.getElementById('header-cashier').textContent = name;
+  document.getElementById('header-role').textContent = role.charAt(0).toUpperCase() + role.slice(1);
+  document.getElementById('login-screen').style.display = 'none';
+  sound.init();
+  sound.successBeep();
+  toast.show(`Welcome, ${name}!`, 'success');
+  updateBillNumber();
+  renderCart();
+  renderReceipt();
+}
+
+// ═══════════════════════════════════════════════
+// BILL NUMBER
+// ═══════════════════════════════════════════════
+function getBillNo() { return 'SM-' + String(state.billCounter).padStart(4, '0'); }
+function updateBillNumber() {
+  const bn = getBillNo();
+  document.getElementById('header-bill-no').textContent = bn;
+  document.getElementById('r-bill-no').textContent = bn;
+  document.getElementById('r-barcode-text').textContent = bn;
+  generateBarcode(bn);
+}
+
+// ═══════════════════════════════════════════════
+// BARCODE GENERATOR (CSS-based)
+// ═══════════════════════════════════════════════
+function generateBarcode(text) {
+  const container = document.getElementById('r-barcode');
+  container.innerHTML = '';
+  const seed = text.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+  let rng = seed;
+  for (let i = 0; i < 50; i++) {
+    rng = (rng * 1103515245 + 12345) & 0x7fffffff;
+    const w = (rng % 3) + 1;
+    const bar = document.createElement('span');
+    bar.style.width = w + 'px';
+    if (i % 2 === 0) bar.style.background = '#111';
+    else bar.style.background = 'transparent';
+    container.appendChild(bar);
+  }
+}
+
+// ═══════════════════════════════════════════════
+// THEME TOGGLE
+// ═══════════════════════════════════════════════
+document.getElementById('btn-theme').addEventListener('click', () => {
+  state.settings.darkMode = !state.settings.darkMode;
+  document.documentElement.classList.toggle('light-mode', !state.settings.darkMode);
+  document.getElementById('btn-theme').textContent = state.settings.darkMode ? '🌙' : '☀️';
+  const toggle = document.getElementById('toggle-dark-mode');
+  if (toggle) toggle.classList.toggle('active', state.settings.darkMode);
+  state.save();
+});
+
+// Apply saved theme
+if (!state.settings.darkMode) {
+  document.documentElement.classList.add('light-mode');
+  document.getElementById('btn-theme').textContent = '☀️';
+}
+
+// ═══════════════════════════════════════════════
+// NAV TABS
+// ═══════════════════════════════════════════════
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const view = tab.dataset.view;
+    document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active'));
+    document.getElementById(`view-${view}`).classList.add('active');
+    if (view === 'dashboard') renderDashboard();
+    if (view === 'inventory') renderInventory();
+    if (view === 'transactions') renderTransactions();
+  });
+});
+
+// ═══════════════════════════════════════════════
+// SEARCH & AUTOCOMPLETE
+// ═══════════════════════════════════════════════
+const searchInput = document.getElementById('search-input');
+const acList = document.getElementById('autocomplete-list');
+
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.trim().toLowerCase();
+  if (q.length < 1) { acList.classList.remove('show'); acHighlightIndex = -1; return; }
+  const results = state.products.filter(p =>
+    p.name.toLowerCase().includes(q) ||
+    p.sku.toLowerCase().includes(q) ||
+    p.cat.toLowerCase().includes(q)
+  ).slice(0, 10);
+  if (results.length === 0) { acList.classList.remove('show'); return; }
+  acHighlightIndex = -1;
+  acList.innerHTML = results.map((p, i) => `
+    <div class="ac-item" data-id="${p.id}" data-index="${i}">
+      <span class="ac-item-name">${highlightMatch(p.name, q)} <span class="cat-tag">${p.cat}</span></span>
+      <span class="ac-item-price">₹${p.price}</span>
+    </div>
+  `).join('');
+  acList.classList.add('show');
+  acList.querySelectorAll('.ac-item').forEach(item => {
+    item.addEventListener('click', () => addToCart(parseInt(item.dataset.id)));
+  });
+});
+
+searchInput.addEventListener('keydown', e => {
+  const items = acList.querySelectorAll('.ac-item');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    acHighlightIndex = Math.min(acHighlightIndex + 1, items.length - 1);
+    updateAcHighlight(items);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    acHighlightIndex = Math.max(acHighlightIndex - 1, 0);
+    updateAcHighlight(items);
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (acHighlightIndex >= 0 && items[acHighlightIndex]) {
+      addToCart(parseInt(items[acHighlightIndex].dataset.id));
+    } else if (items.length > 0) {
+      addToCart(parseInt(items[0].dataset.id));
+    }
+  } else if (e.key === 'Escape') {
+    acList.classList.remove('show');
+    acHighlightIndex = -1;
+  }
+});
+
+searchInput.addEventListener('blur', () => { setTimeout(() => { acList.classList.remove('show'); }, 200); });
+
+function updateAcHighlight(items) {
+  items.forEach((it, i) => it.classList.toggle('highlighted', i === acHighlightIndex));
+}
+
+function highlightMatch(text, query) {
+  const idx = text.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) return text;
+  return text.slice(0, idx) + '<strong style="color:var(--c-primary)">' + text.slice(idx, idx + query.length) + '</strong>' + text.slice(idx + query.length);
+}
+
+// ═══════════════════════════════════════════════
+// CART OPERATIONS
+// ═══════════════════════════════════════════════
+function addToCart(productId, qty = 1) {
+  const product = state.getProduct(productId);
+  if (!product) { toast.show('Product not found', 'error'); return; }
+  if (product.stock <= 0) { toast.show(`${product.name} is out of stock!`, 'error'); sound.errorBeep(); return; }
+
+  // Save undo state
+  state.undoStack.push(JSON.parse(JSON.stringify(state.cart)));
+  if (state.undoStack.length > 20) state.undoStack.shift();
+
+  const existing = state.cart.find(item => item.id === productId);
+  if (existing) {
+    if (existing.qty + qty > product.stock) {
+      toast.show(`Only ${product.stock} in stock!`, 'warning');
+      return;
+    }
+    existing.qty += qty;
+  } else {
+    state.cart.push({ id: productId, name: product.name, price: product.price, qty, cost: product.cost });
+  }
+
+  sound.scanBeep();
+  searchInput.value = '';
+  acList.classList.remove('show');
+  acHighlightIndex = -1;
+  renderCart();
+  renderReceipt();
+  state.save();
+  toast.show(`${product.name} added`, 'success', 1500);
+}
+
+function removeFromCart(index) {
+  state.undoStack.push(JSON.parse(JSON.stringify(state.cart)));
+  state.cart.splice(index, 1);
+  renderCart();
+  renderReceipt();
+  state.save();
+}
+
+function updateQty(index, newQty) {
+  const item = state.cart[index];
+  if (!item) return;
+  const product = state.getProduct(item.id);
+  newQty = parseInt(newQty);
+  if (isNaN(newQty) || newQty < 1) { removeFromCart(index); return; }
+  if (product && newQty > product.stock) {
+    toast.show(`Only ${product.stock} in stock!`, 'warning');
+    newQty = product.stock;
+  }
+  state.undoStack.push(JSON.parse(JSON.stringify(state.cart)));
+  item.qty = newQty;
+  renderCart();
+  renderReceipt();
+  state.save();
+}
+
+function clearCart() {
+  if (state.cart.length === 0) return;
+  state.undoStack.push(JSON.parse(JSON.stringify(state.cart)));
+  state.cart = [];
+  state.appliedCoupon = null;
+  document.getElementById('coupon-applied').classList.add('hidden');
+  document.getElementById('coupon-input').value = '';
+  document.getElementById('discount-value').value = '0';
+  renderCart();
+  renderReceipt();
+  state.save();
+  toast.show('Cart cleared', 'info');
+}
+
+function undoLastAction() {
+  if (state.undoStack.length === 0) { toast.show('Nothing to undo', 'warning'); return; }
+  state.cart = state.undoStack.pop();
+  renderCart();
+  renderReceipt();
+  state.save();
+  toast.show('Undo successful', 'info');
+}
+
+// ═══════════════════════════════════════════════
+// CALCULATE TOTALS
+// ═══════════════════════════════════════════════
+function calculateTotals() {
+  const cart = state.cart;
+  const itemCount = cart.reduce((s, i) => s + i.qty, 0);
+  const subtotal = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+  const costTotal = cart.reduce((s, i) => s + ((i.cost || 0) * i.qty), 0);
+
+  // Discount
+  let discountAmount = 0;
+  const discountVal = parseFloat(document.getElementById('discount-value').value) || 0;
+  const discountType = document.getElementById('discount-type').value;
+  if (discountType === 'percent') discountAmount = subtotal * (discountVal / 100);
+  else discountAmount = discountVal;
+
+  // Coupon discount
+  if (state.appliedCoupon) {
+    const c = COUPONS[state.appliedCoupon];
+    if (c) {
+      if (c.type === 'percent') discountAmount += subtotal * (c.value / 100);
+      else discountAmount += c.value;
+    }
+  }
+
+  discountAmount = Math.min(discountAmount, subtotal);
+  const afterDiscount = subtotal - discountAmount;
+  const gstRate = state.settings.gstRate || 5;
+  const gst = afterDiscount * (gstRate / 100);
+  const grandTotal = afterDiscount + gst;
+  const profit = afterDiscount - costTotal;
+
+  return { itemCount, subtotal, discountAmount, gst, grandTotal, profit, gstRate, costTotal };
+}
+
+// ═══════════════════════════════════════════════
+// RENDER CART
+// ═══════════════════════════════════════════════
+function renderCart() {
+  const body = document.getElementById('cart-body');
+  const empty = document.getElementById('cart-empty');
+  const cart = state.cart;
+
+  if (cart.length === 0) {
+    body.innerHTML = '';
+    body.appendChild(createEmptyState());
+    updateTotalsDisplay({ itemCount: 0, subtotal: 0, discountAmount: 0, gst: 0, grandTotal: 0 });
+    return;
+  }
+
+  body.innerHTML = cart.map((item, i) => `
+    <div class="cart-item">
+      <span class="cart-item-num">${i + 1}</span>
+      <span class="cart-item-name" title="${item.name}">${item.name}</span>
+      <span class="cart-item-price">₹${item.price.toFixed(2)}</span>
+      <div class="cart-qty-controls">
+        <button class="qty-btn" onclick="updateQty(${i}, ${item.qty - 1})">−</button>
+        <input class="qty-input" type="number" value="${item.qty}" min="1" onchange="updateQty(${i}, this.value)">
+        <button class="qty-btn" onclick="updateQty(${i}, ${item.qty + 1})">+</button>
+      </div>
+      <span class="cart-item-total">₹${(item.price * item.qty).toFixed(2)}</span>
+      <button class="cart-remove-btn" onclick="removeFromCart(${i})">✕</button>
+    </div>
+  `).join('');
+
+  const totals = calculateTotals();
+  updateTotalsDisplay(totals);
+}
+
+function createEmptyState() {
+  const div = document.createElement('div');
+  div.className = 'cart-empty';
+  div.innerHTML = `
+    <div class="cart-empty-icon">🛒</div>
+    <div class="cart-empty-text">Cart is empty</div>
+    <div class="cart-empty-hint">Search products or browse catalog to add items</div>
+  `;
+  return div;
+}
+
+function updateTotalsDisplay(t) {
+  document.getElementById('total-items').textContent = t.itemCount;
+  document.getElementById('total-subtotal').textContent = '₹' + t.subtotal.toFixed(2);
+  document.getElementById('total-discount').textContent = '-₹' + t.discountAmount.toFixed(2);
+  document.getElementById('total-gst').textContent = '₹' + t.gst.toFixed(2);
+  document.getElementById('total-grand').textContent = '₹' + t.grandTotal.toFixed(2);
+}
+
+// Recalc on discount change
+document.getElementById('discount-value').addEventListener('input', () => { renderCart(); renderReceipt(); });
+document.getElementById('discount-type').addEventListener('change', () => { renderCart(); renderReceipt(); });
+
+// ═══════════════════════════════════════════════
+// RENDER RECEIPT
+// ═══════════════════════════════════════════════
+function renderReceipt() {
+  const now = new Date();
+  document.getElementById('r-date').textContent = now.toLocaleDateString('en-IN');
+  document.getElementById('r-time').textContent = now.toLocaleTimeString('en-IN', { hour12: true });
+  document.getElementById('r-cashier').textContent = state.user ? state.user.name : '—';
+
+  const itemsEl = document.getElementById('r-items');
+  const cart = state.cart;
+
+  if (cart.length === 0) {
+    itemsEl.innerHTML = '<div class="receipt-center" style="padding:20px 0;color:#aaa;font-size:0.65rem;">No items</div>';
+  } else {
+    itemsEl.innerHTML = cart.map(item => `
+      <div class="receipt-item-row">
+        <span class="receipt-item-name">${item.name}</span>
+        <span class="receipt-item-total">₹${(item.price * item.qty).toFixed(2)}</span>
+      </div>
+      <div class="receipt-item-detail">${item.qty} x ₹${item.price.toFixed(2)}</div>
+    `).join('');
+  }
+
+  const totals = calculateTotals();
+  document.getElementById('r-subtotal').textContent = '₹' + totals.subtotal.toFixed(2);
+  document.getElementById('r-discount').textContent = '-₹' + totals.discountAmount.toFixed(2);
+  document.getElementById('r-gst').textContent = '₹' + totals.gst.toFixed(2);
+  document.getElementById('r-total').textContent = '₹' + totals.grandTotal.toFixed(2);
+}
+
+// ═══════════════════════════════════════════════
+// MULTI-CART TABS
+// ═══════════════════════════════════════════════
+function renderCartTabs() {
+  const container = document.getElementById('cart-tabs');
+  container.innerHTML = state.carts.map((cart, i) => `
+    <button class="cart-tab ${i === state.activeCartIndex ? 'active' : ''}" data-cart="${i}">
+      🛒 Cart ${i + 1} ${cart.length > 0 ? '(' + cart.length + ')' : ''}
+      ${state.carts.length > 1 ? '<span class="close-tab" data-close="' + i + '">✕</span>' : ''}
+    </button>
+  `).join('') + '<button class="add-cart-btn" id="btn-add-cart">＋</button>';
+
+  container.querySelectorAll('.cart-tab').forEach(tab => {
+    tab.addEventListener('click', e => {
+      if (e.target.classList.contains('close-tab')) {
+        const idx = parseInt(e.target.dataset.close);
+        if (state.carts.length <= 1) return;
+        state.carts.splice(idx, 1);
+        if (state.activeCartIndex >= state.carts.length) state.activeCartIndex = state.carts.length - 1;
+        renderCartTabs();
+        renderCart();
+        renderReceipt();
+        state.save();
+        return;
+      }
+      state.activeCartIndex = parseInt(tab.dataset.cart);
+      renderCartTabs();
+      renderCart();
+      renderReceipt();
+    });
+  });
+
+  document.getElementById('btn-add-cart').addEventListener('click', () => {
+    if (state.carts.length >= 5) { toast.show('Max 5 carts allowed', 'warning'); return; }
+    state.carts.push([]);
+    state.activeCartIndex = state.carts.length - 1;
+    renderCartTabs();
+    renderCart();
+    renderReceipt();
+    state.save();
+  });
+}
+renderCartTabs();
+
+// ═══════════════════════════════════════════════
+// ACTION BUTTONS
+// ═══════════════════════════════════════════════
+document.getElementById('btn-clear-cart').addEventListener('click', clearCart);
+document.getElementById('btn-undo').addEventListener('click', undoLastAction);
+document.getElementById('btn-pay').addEventListener('click', openPaymentModal);
+
+document.getElementById('btn-save-cart').addEventListener('click', () => {
+  if (state.cart.length === 0) { toast.show('Cart is empty', 'warning'); return; }
+  state.savedCarts.push({
+    items: JSON.parse(JSON.stringify(state.cart)),
+    savedAt: new Date().toISOString(),
+    label: 'Draft #' + (state.savedCarts.length + 1),
+  });
+  state.save();
+  toast.show('Cart saved as draft', 'success');
+});
+
+document.getElementById('btn-load-cart').addEventListener('click', () => {
+  if (state.savedCarts.length === 0) { toast.show('No saved carts', 'info'); return; }
+  openSavedCartsModal();
+});
+
+// ═══════════════════════════════════════════════
+// COUPON SYSTEM
+// ═══════════════════════════════════════════════
+document.getElementById('btn-apply-coupon').addEventListener('click', () => {
+  const code = document.getElementById('coupon-input').value.trim().toUpperCase();
+  if (!code) { toast.show('Enter a coupon code', 'warning'); return; }
+  const coupon = COUPONS[code];
+  if (!coupon) { toast.show('Invalid coupon code', 'error'); sound.errorBeep(); return; }
+  const totals = calculateTotals();
+  if (totals.subtotal < coupon.minOrder) {
+    toast.show(`Min order ₹${coupon.minOrder} for this coupon`, 'warning');
+    return;
+  }
+  state.appliedCoupon = code;
+  document.getElementById('coupon-applied').classList.remove('hidden');
+  document.getElementById('coupon-applied-text').textContent = `${code}: ${coupon.desc}`;
+  document.getElementById('coupon-input').value = '';
+  renderCart();
+  renderReceipt();
+  state.save();
+  sound.successBeep();
+  toast.show(`Coupon ${code} applied!`, 'success');
+});
+
+document.getElementById('btn-remove-coupon').addEventListener('click', () => {
+  state.appliedCoupon = null;
+  document.getElementById('coupon-applied').classList.add('hidden');
+  renderCart();
+  renderReceipt();
+  state.save();
+});
+
+// ═══════════════════════════════════════════════
+// LOYALTY SYSTEM
+// ═══════════════════════════════════════════════
+document.getElementById('btn-loyalty-check').addEventListener('click', () => {
+  const phone = document.getElementById('loyalty-phone').value.trim();
+  if (phone.length !== 10) { toast.show('Enter valid 10-digit phone', 'warning'); return; }
+  if (!state.loyaltyDB[phone]) {
+    state.loyaltyDB[phone] = { points: 0, visits: 0, totalSpent: 0 };
+  }
+  const customer = state.loyaltyDB[phone];
+  document.getElementById('loyalty-info').style.display = 'flex';
+  document.getElementById('loyalty-points').textContent = customer.points;
+  toast.show(`Customer found! ${customer.points} points`, 'success');
+});
+
+// ═══════════════════════════════════════════════
+// PAYMENT MODAL
+// ═══════════════════════════════════════════════
+const paymentModal = document.getElementById('payment-modal');
+let selectedPayMethod = 'cash';
+
+function openPaymentModal() {
+  if (state.cart.length === 0) { toast.show('Cart is empty', 'warning'); return; }
+  const totals = calculateTotals();
+  document.getElementById('pay-total').textContent = '₹' + totals.grandTotal.toFixed(2);
+  document.getElementById('cash-tendered').value = '';
+  document.getElementById('change-display').textContent = 'Change: ₹0.00';
+  document.getElementById('change-display').className = 'change-display zero';
+  selectedPayMethod = 'cash';
+  document.querySelectorAll('.pay-method-btn').forEach(b => b.classList.toggle('active', b.dataset.method === 'cash'));
+  document.getElementById('cash-section').classList.add('show');
+  paymentModal.showModal();
+}
+
+document.getElementById('close-payment').addEventListener('click', () => paymentModal.close());
+document.getElementById('cancel-payment').addEventListener('click', () => paymentModal.close());
+
+document.querySelectorAll('.pay-method-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    selectedPayMethod = btn.dataset.method;
+    document.querySelectorAll('.pay-method-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('cash-section').classList.toggle('show', selectedPayMethod === 'cash');
+  });
+});
+
+// Cash tendered
+document.getElementById('cash-tendered').addEventListener('input', updateChange);
+document.querySelectorAll('.cash-quick-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const totals = calculateTotals();
+    const amount = btn.dataset.amount === 'exact' ? totals.grandTotal : parseInt(btn.dataset.amount);
+    document.getElementById('cash-tendered').value = Math.ceil(amount);
+    updateChange();
+  });
+});
+
+function updateChange() {
+  const totals = calculateTotals();
+  const tendered = parseFloat(document.getElementById('cash-tendered').value) || 0;
+  const change = tendered - totals.grandTotal;
+  const display = document.getElementById('change-display');
+  if (change > 0) {
+    display.textContent = `Change: ₹${change.toFixed(2)}`;
+    display.className = 'change-display positive';
+  } else if (change < 0) {
+    display.textContent = `Insufficient: ₹${Math.abs(change).toFixed(2)} more needed`;
+    display.className = 'change-display negative';
+  } else {
+    display.textContent = 'Exact amount ✓';
+    display.className = 'change-display positive';
+  }
+}
+
+// Confirm Payment
+document.getElementById('confirm-payment').addEventListener('click', () => {
+  const totals = calculateTotals();
+  if (selectedPayMethod === 'cash') {
+    const tendered = parseFloat(document.getElementById('cash-tendered').value) || 0;
+    if (tendered < totals.grandTotal) {
+      toast.show('Insufficient cash!', 'error');
+      sound.errorBeep();
+      return;
+    }
+  }
+
+  // Process transaction
+  const tendered = selectedPayMethod === 'cash' ? parseFloat(document.getElementById('cash-tendered').value) : totals.grandTotal;
+  const change = tendered - totals.grandTotal;
+
+  const transaction = {
+    billNo: getBillNo(),
+    date: new Date().toISOString(),
+    items: JSON.parse(JSON.stringify(state.cart)),
+    subtotal: totals.subtotal,
+    discount: totals.discountAmount,
+    gst: totals.gst,
+    total: totals.grandTotal,
+    profit: totals.profit,
+    method: selectedPayMethod,
+    cashTendered: tendered,
+    change: change,
+    cashier: state.user ? state.user.name : 'Unknown',
+  };
+
+  // Update stock
+  state.cart.forEach(item => {
+    const product = state.getProduct(item.id);
+    if (product) {
+      product.stock = Math.max(0, product.stock - item.qty);
+      if (product.stock <= 5) {
+        toast.show(`⚠️ Low stock: ${product.name} (${product.stock} left)`, 'warning', 4000);
+      }
+    }
+  });
+
+  // Update loyalty
+  const phone = document.getElementById('loyalty-phone').value.trim();
+  if (phone.length === 10) {
+    if (!state.loyaltyDB[phone]) state.loyaltyDB[phone] = { points: 0, visits: 0, totalSpent: 0 };
+    const points = Math.floor(totals.grandTotal / 10);
+    state.loyaltyDB[phone].points += points;
+    state.loyaltyDB[phone].visits += 1;
+    state.loyaltyDB[phone].totalSpent += totals.grandTotal;
+    toast.show(`+${points} loyalty points earned!`, 'info', 3000);
+  }
+
+  // Save transaction
+  state.transactions.push(transaction);
+  state.billCounter++;
+
+  // Update receipt with payment info
+  document.getElementById('r-payment-info').style.display = 'block';
+  document.getElementById('r-pay-method').textContent = selectedPayMethod.toUpperCase();
+  if (selectedPayMethod === 'cash') {
+    document.getElementById('r-cash-row').style.display = 'flex';
+    document.getElementById('r-change-row').style.display = 'flex';
+    document.getElementById('r-cash-tendered').textContent = '₹' + tendered.toFixed(2);
+    document.getElementById('r-change').textContent = '₹' + change.toFixed(2);
+  } else {
+    document.getElementById('r-cash-row').style.display = 'none';
+    document.getElementById('r-change-row').style.display = 'none';
+  }
+
+  // Clear cart
+  state.cart = [];
+  state.appliedCoupon = null;
+  document.getElementById('coupon-applied').classList.add('hidden');
+  document.getElementById('discount-value').value = '0';
+  document.getElementById('loyalty-phone').value = '';
+  document.getElementById('loyalty-info').style.display = 'none';
+
+  state.save();
+  paymentModal.close();
+  sound.successBeep();
+  toast.show(`Payment successful! ${getBillNo()}`, 'success', 4000);
+
+  // Don't render cart/receipt yet — let user see the final receipt
+  updateBillNumber();
+  renderCart();
+  renderCartTabs();
+});
+
+// ═══════════════════════════════════════════════
+// PRODUCT BROWSER MODAL
+// ═══════════════════════════════════════════════
+const browserModal = document.getElementById('product-browser');
+let browserCategory = '';
+
+document.getElementById('btn-browse').addEventListener('click', () => {
+  browserCategory = '';
+  renderBrowser();
+  browserModal.showModal();
+});
+document.getElementById('close-browser').addEventListener('click', () => browserModal.close());
+
+document.getElementById('browser-search-input').addEventListener('input', renderBrowser);
+
+function renderBrowser() {
+  const q = document.getElementById('browser-search-input').value.trim().toLowerCase();
+  const categories = [...new Set(state.products.map(p => p.cat))].sort();
+
+  // Category filters
+  const filtersEl = document.getElementById('category-filters');
+  filtersEl.innerHTML = `<button class="cat-filter-btn ${browserCategory === '' ? 'active' : ''}" data-cat="">All</button>` +
+    categories.map(c => `<button class="cat-filter-btn ${browserCategory === c ? 'active' : ''}" data-cat="${c}">${c}</button>`).join('');
+
+  filtersEl.querySelectorAll('.cat-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      browserCategory = btn.dataset.cat;
+      renderBrowser();
+    });
+  });
+
+  // Filter products
+  let products = state.products;
+  if (browserCategory) products = products.filter(p => p.cat === browserCategory);
+  if (q) products = products.filter(p => p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q));
+
+  const grid = document.getElementById('products-grid');
+  grid.innerHTML = products.map(p => `
+    <div class="product-card" onclick="addToCart(${p.id}); document.getElementById('product-browser').close();">
+      <div class="product-card-name" title="${p.name}">${p.name}</div>
+      <div class="product-card-cat">${p.cat}</div>
+      <div class="product-card-price">₹${p.price}</div>
+      <div class="product-card-stock ${p.stock <= 5 ? 'low' : 'ok'}">Stock: ${p.stock}</div>
+      <div class="product-card-add">+ TAP TO ADD</div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════
+// SAVED CARTS MODAL
+// ═══════════════════════════════════════════════
+const savedCartsModal = document.getElementById('saved-carts-modal');
+document.getElementById('close-saved-carts').addEventListener('click', () => savedCartsModal.close());
+
+function openSavedCartsModal() {
+  const list = document.getElementById('saved-carts-list');
+  if (state.savedCarts.length === 0) {
+    list.innerHTML = '<div class="text-center text-dim" style="padding:20px;">No saved carts</div>';
+  } else {
+    list.innerHTML = state.savedCarts.map((sc, i) => `
+      <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--c-bg-elevated);border-radius:var(--radius-sm);">
+        <div style="flex:1;">
+          <div style="font-weight:600;">${sc.label}</div>
+          <div class="text-dim" style="font-size:0.75rem;">${sc.items.length} items • Saved ${new Date(sc.savedAt).toLocaleString('en-IN')}</div>
+        </div>
+        <button class="btn btn-small btn-primary" onclick="loadSavedCart(${i})">LOAD</button>
+        <button class="btn btn-small btn-danger" onclick="deleteSavedCart(${i})">🗑</button>
+      </div>
+    `).join('');
+  }
+  savedCartsModal.showModal();
+}
+
+function loadSavedCart(index) {
+  const sc = state.savedCarts[index];
+  if (!sc) return;
+  state.cart = JSON.parse(JSON.stringify(sc.items));
+  renderCart();
+  renderReceipt();
+  renderCartTabs();
+  state.save();
+  savedCartsModal.close();
+  toast.show('Cart loaded', 'success');
+}
+
+function deleteSavedCart(index) {
+  state.savedCarts.splice(index, 1);
+  state.save();
+  openSavedCartsModal();
+  toast.show('Saved cart deleted', 'info');
+}
+
+// ═══════════════════════════════════════════════
+// INVENTORY VIEW
+// ═══════════════════════════════════════════════
+function renderInventory() {
+  const q = document.getElementById('inv-search').value.trim().toLowerCase();
+  const catFilter = document.getElementById('inv-category-filter').value;
+  const stockFilter = document.getElementById('inv-stock-filter').value;
+
+  // Populate categories
+  const catSelect = document.getElementById('inv-category-filter');
+  if (catSelect.options.length <= 1) {
+    const cats = [...new Set(state.products.map(p => p.cat))].sort();
+    cats.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c;
+      opt.textContent = c;
+      catSelect.appendChild(opt);
+    });
+  }
+
+  let products = state.products;
+  if (q) products = products.filter(p => p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q));
+  if (catFilter) products = products.filter(p => p.cat === catFilter);
+  if (stockFilter === 'low') products = products.filter(p => p.stock < 10 && p.stock > 0);
+  if (stockFilter === 'critical') products = products.filter(p => p.stock <= 5 && p.stock > 0);
+  if (stockFilter === 'out') products = products.filter(p => p.stock === 0);
+
+  const tbody = document.getElementById('inv-tbody');
+  tbody.innerHTML = products.map(p => {
+    const stockClass = p.stock === 0 ? 'critical' : p.stock <= 5 ? 'critical' : p.stock < 10 ? 'low' : 'ok';
+    const stockLabel = p.stock === 0 ? 'OUT' : p.stock <= 5 ? 'CRITICAL' : p.stock < 10 ? 'LOW' : 'OK';
+    return `
+      <tr>
+        <td class="mono" style="font-size:0.7rem;color:var(--c-text-dim);">${p.sku}</td>
+        <td style="font-weight:500;">${p.name}</td>
+        <td class="text-dim">${p.cat}</td>
+        <td class="mono">₹${p.price}</td>
+        <td class="mono text-dim">₹${p.cost}</td>
+        <td class="mono text-primary">${p.margin}%</td>
+        <td class="mono">${p.stock}</td>
+        <td><span class="stock-badge ${stockClass}">${stockLabel}</span></td>
+        <td class="text-dim" style="font-size:0.75rem;">${p.supplier}</td>
+        <td>
+          <button class="btn btn-small btn-secondary" onclick="openRestockModal(${p.id})">📦</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+document.getElementById('inv-search').addEventListener('input', renderInventory);
+document.getElementById('inv-category-filter').addEventListener('change', renderInventory);
+document.getElementById('inv-stock-filter').addEventListener('change', renderInventory);
+
+// Restock Modal
+const restockModal = document.getElementById('restock-modal');
+let restockProductId = null;
+
+function openRestockModal(productId) {
+  const p = state.getProduct(productId);
+  if (!p) return;
+  restockProductId = productId;
+  document.getElementById('restock-product').value = p.name;
+  document.getElementById('restock-current').value = p.stock;
+  document.getElementById('restock-qty').value = 50;
+  restockModal.showModal();
+}
+document.getElementById('close-restock').addEventListener('click', () => restockModal.close());
+document.getElementById('cancel-restock').addEventListener('click', () => restockModal.close());
+document.getElementById('confirm-restock').addEventListener('click', () => {
+  const qty = parseInt(document.getElementById('restock-qty').value) || 0;
+  if (qty <= 0) { toast.show('Enter valid quantity', 'error'); return; }
+  const p = state.getProduct(restockProductId);
+  if (p) {
+    p.stock += qty;
+    state.stockHistory.push({
+      productId: p.id,
+      productName: p.name,
+      qty,
+      type: 'restock',
+      date: new Date().toISOString(),
+    });
+    state.save();
+    renderInventory();
+    toast.show(`${p.name} restocked +${qty}`, 'success');
+    sound.successBeep();
+  }
+  restockModal.close();
+});
+
+document.getElementById('btn-restock-all').addEventListener('click', () => {
+  let count = 0;
+  state.products.forEach(p => {
+    if (p.stock < 10) {
+      const addQty = 50 - p.stock;
+      p.stock += addQty;
+      count++;
+    }
+  });
+  state.save();
+  renderInventory();
+  toast.show(`${count} low-stock items restocked`, 'success');
+});
+
+// Supplier Market Modal
+const supplierModal = document.getElementById('supplier-modal');
+document.getElementById('btn-supplier-market').addEventListener('click', () => {
+  renderSupplierMarket();
+  supplierModal.showModal();
+});
+document.getElementById('close-supplier').addEventListener('click', () => supplierModal.close());
+
+function renderSupplierMarket() {
+  const q = document.getElementById('supplier-search').value.trim().toLowerCase();
+  let products = state.products;
+  if (q) products = products.filter(p => p.supplier.toLowerCase().includes(q) || p.name.toLowerCase().includes(q));
+
+  document.getElementById('supplier-tbody').innerHTML = products.map(p => `
+    <tr>
+      <td style="font-weight:500;">${p.supplier}</td>
+      <td>${p.name}</td>
+      <td class="mono">₹${p.cost}</td>
+      <td class="mono">10</td>
+      <td><button class="btn btn-small btn-primary" onclick="buyFromSupplier(${p.id})">BUY</button></td>
+    </tr>
+  `).join('');
+}
+document.getElementById('supplier-search').addEventListener('input', renderSupplierMarket);
+
+function buyFromSupplier(productId) {
+  const p = state.getProduct(productId);
+  if (!p) return;
+  const qty = 50;
+  const totalCost = p.cost * qty;
+  p.stock += qty;
+  state.expenses.push({
+    type: 'purchase',
+    productId: p.id,
+    productName: p.name,
+    qty,
+    cost: totalCost,
+    supplier: p.supplier,
+    date: new Date().toISOString(),
+  });
+  state.save();
+  renderSupplierMarket();
+  renderInventory();
+  toast.show(`Bought ${qty}x ${p.name} from ${p.supplier} (₹${totalCost})`, 'success');
+  sound.successBeep();
+}
+
+// ═══════════════════════════════════════════════
+// TRANSACTIONS VIEW
+// ═══════════════════════════════════════════════
+function renderTransactions() {
+  const q = document.getElementById('txn-search').value.trim().toLowerCase();
+  const methodFilter = document.getElementById('txn-filter-method').value;
+  const dateFilter = document.getElementById('txn-date-filter').value;
+
+  let txns = [...state.transactions].reverse();
+  if (q) txns = txns.filter(t => t.billNo.toLowerCase().includes(q) || t.cashier.toLowerCase().includes(q));
+  if (methodFilter) txns = txns.filter(t => t.method === methodFilter);
+  if (dateFilter) txns = txns.filter(t => t.date.startsWith(dateFilter));
+
+  document.getElementById('txn-tbody').innerHTML = txns.map(t => `
+    <tr>
+      <td class="mono" style="font-weight:600;color:var(--c-primary);">${t.billNo}</td>
+      <td class="mono" style="font-size:0.75rem;">${new Date(t.date).toLocaleString('en-IN')}</td>
+      <td class="mono">${t.items.length}</td>
+      <td class="mono">₹${t.subtotal.toFixed(2)}</td>
+      <td class="mono" style="color:var(--c-success);">-₹${t.discount.toFixed(2)}</td>
+      <td class="mono">₹${t.gst.toFixed(2)}</td>
+      <td class="mono" style="font-weight:700;">₹${t.total.toFixed(2)}</td>
+      <td><span class="stock-badge ok" style="text-transform:uppercase;">${t.method}</span></td>
+      <td class="text-dim">${t.cashier}</td>
+    </tr>
+  `).join('');
+}
+
+document.getElementById('txn-search').addEventListener('input', renderTransactions);
+document.getElementById('txn-filter-method').addEventListener('change', renderTransactions);
+document.getElementById('txn-date-filter').addEventListener('change', renderTransactions);
+
+// ═══════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════
+function renderDashboard() {
+  const today = new Date().toISOString().split('T')[0];
+  const todayTxns = state.transactions.filter(t => t.date.startsWith(today));
+  const totalRevenue = todayTxns.reduce((s, t) => s + t.total, 0);
+  const totalProfit = todayTxns.reduce((s, t) => s + (t.profit || 0), 0);
+  const avgOrder = todayTxns.length > 0 ? totalRevenue / todayTxns.length : 0;
+
+  document.getElementById('stat-revenue').textContent = '₹' + Math.round(totalRevenue).toLocaleString('en-IN');
+  document.getElementById('stat-revenue-sub').textContent = todayTxns.length + ' transactions';
+  document.getElementById('stat-orders').textContent = todayTxns.length;
+  document.getElementById('stat-avg').textContent = '₹' + Math.round(avgOrder).toLocaleString('en-IN');
+  document.getElementById('stat-profit').textContent = '₹' + Math.round(totalProfit).toLocaleString('en-IN');
+  document.getElementById('stat-profit-sub').textContent = totalRevenue > 0 ? Math.round((totalProfit / totalRevenue) * 100) + '% margin' : '—';
+
+  // Hourly chart
+  const hourlyData = new Array(12).fill(0);
+  todayTxns.forEach(t => {
+    const h = new Date(t.date).getHours();
+    const idx = Math.max(0, Math.min(11, h - 8));
+    hourlyData[idx] += t.total;
+  });
+  const maxH = Math.max(...hourlyData, 1);
+  document.getElementById('chart-hourly').innerHTML = hourlyData.map((v, i) => `
+    <div class="bar-col">
+      <div class="bar-value">${v > 0 ? '₹' + Math.round(v) : ''}</div>
+      <div class="bar" style="height:${(v / maxH) * 100}%"></div>
+      <div class="bar-label">${8 + i}:00</div>
+    </div>
+  `).join('');
+
+  // Top products
+  const prodSales = {};
+  state.transactions.forEach(t => {
+    t.items.forEach(item => {
+      if (!prodSales[item.name]) prodSales[item.name] = { qty: 0, revenue: 0 };
+      prodSales[item.name].qty += item.qty;
+      prodSales[item.name].revenue += item.price * item.qty;
+    });
+  });
+  const topProducts = Object.entries(prodSales)
+    .sort((a, b) => b[1].revenue - a[1].revenue)
+    .slice(0, 5);
+
+  document.getElementById('top-products').innerHTML = topProducts.length > 0 ?
+    topProducts.map(([name, data], i) => `
+      <div class="top-product-item">
+        <span class="top-product-rank">#${i + 1}</span>
+        <span class="top-product-name">${name}</span>
+        <span class="top-product-qty">${data.qty} sold</span>
+        <span class="top-product-rev">₹${Math.round(data.revenue)}</span>
+      </div>
+    `).join('') :
+    '<div class="text-center text-dim" style="padding:20px;">No sales data yet</div>';
+
+  // Category chart
+  const catRevenue = {};
+  state.transactions.forEach(t => {
+    t.items.forEach(item => {
+      const product = state.getProduct(item.id);
+      const cat = product ? product.cat : 'Other';
+      catRevenue[cat] = (catRevenue[cat] || 0) + item.price * item.qty;
+    });
+  });
+  const catEntries = Object.entries(catRevenue).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const maxC = catEntries.length > 0 ? Math.max(...catEntries.map(e => e[1])) : 1;
+  document.getElementById('chart-category').innerHTML = catEntries.length > 0 ?
+    catEntries.map(([cat, rev]) => `
+      <div class="bar-col">
+        <div class="bar-value">₹${Math.round(rev)}</div>
+        <div class="bar" style="height:${(rev / maxC) * 100}%;background:linear-gradient(to top, #5C3DC7, #9C6AFF);"></div>
+        <div class="bar-label">${cat.substring(0, 6)}</div>
+      </div>
+    `).join('') :
+    '<div class="text-center text-dim" style="padding:20px;width:100%;">No data</div>';
+
+  // Weekly trend
+  const weeklyData = [];
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+    const dayTxns = state.transactions.filter(t => t.date.startsWith(dateStr));
+    weeklyData.push({
+      label: dayNames[d.getDay()],
+      value: dayTxns.reduce((s, t) => s + t.total, 0),
+    });
+  }
+  const maxW = Math.max(...weeklyData.map(d => d.value), 1);
+  document.getElementById('chart-weekly').innerHTML = weeklyData.map(d => `
+    <div class="bar-col">
+      <div class="bar-value">${d.value > 0 ? '₹' + Math.round(d.value) : ''}</div>
+      <div class="bar" style="height:${(d.value / maxW) * 100}%;background:linear-gradient(to top, var(--c-success), #69F0AE);"></div>
+      <div class="bar-label">${d.label}</div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════
+// EXPORT / IMPORT / BACKUP
+// ═══════════════════════════════════════════════
+document.getElementById('btn-export-report').addEventListener('click', () => {
+  const data = state.exportData();
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `singhmart_backup_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast.show('Report exported', 'success');
+});
+
+document.getElementById('btn-backup').addEventListener('click', () => {
+  const data = state.exportData();
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `singhmart_backup_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast.show('Backup downloaded', 'success');
+});
+
+document.getElementById('btn-restore').addEventListener('click', () => {
+  document.getElementById('file-restore').click();
+});
+
+document.getElementById('file-restore').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    if (state.importData(ev.target.result)) {
+      toast.show('Data restored successfully!', 'success');
+      renderCart();
+      renderReceipt();
+      renderCartTabs();
+    } else {
+      toast.show('Invalid backup file', 'error');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+document.getElementById('btn-print-report').addEventListener('click', () => window.print());
+document.getElementById('btn-print-receipt').addEventListener('click', () => window.print());
+
+document.getElementById('btn-new-bill').addEventListener('click', () => {
+  document.getElementById('r-payment-info').style.display = 'none';
+  renderReceipt();
+  toast.show('New bill started', 'info');
+});
+
+// ═══════════════════════════════════════════════
+// SETTINGS MODAL
+// ═══════════════════════════════════════════════
+const settingsModal = document.getElementById('settings-modal');
+document.getElementById('btn-settings').addEventListener('click', () => settingsModal.showModal());
+document.getElementById('close-settings').addEventListener('click', () => settingsModal.close());
+
+document.getElementById('toggle-dark-mode').addEventListener('click', function() {
+  this.classList.toggle('active');
+  state.settings.darkMode = this.classList.contains('active');
+  document.documentElement.classList.toggle('light-mode', !state.settings.darkMode);
+  document.getElementById('btn-theme').textContent = state.settings.darkMode ? '🌙' : '☀️';
+  state.save();
+});
+
+document.getElementById('toggle-sound').addEventListener('click', function() {
+  this.classList.toggle('active');
+  state.settings.soundEnabled = this.classList.contains('active');
+  state.save();
+});
+
+document.getElementById('setting-gst').addEventListener('change', function() {
+  state.settings.gstRate = parseInt(this.value) || 5;
+  state.save();
+  renderCart();
+  renderReceipt();
+});
+
+document.getElementById('btn-backup-settings').addEventListener('click', () => {
+  document.getElementById('btn-backup').click();
+});
+
+document.getElementById('btn-restore-settings').addEventListener('click', () => {
+  document.getElementById('btn-restore').click();
+});
+
+document.getElementById('btn-clear-data').addEventListener('click', () => {
+  if (confirm('This will clear ALL data including transactions. Are you sure?')) {
+    localStorage.removeItem('singhmart_data');
+    location.reload();
+  }
+});
+
+// ═══════════════════════════════════════════════
+// LOGOUT
+// ═══════════════════════════════════════════════
+document.getElementById('btn-logout').addEventListener('click', () => {
+  if (confirm('Are you sure you want to logout?')) {
+    document.getElementById('login-screen').style.display = 'flex';
+    state.user = null;
+  }
+});
+
+// ═══════════════════════════════════════════════
+// VOICE SEARCH (optional)
+// ═══════════════════════════════════════════════
+document.getElementById('btn-voice').addEventListener('click', () => {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    toast.show('Voice search not supported in this browser', 'warning');
+    return;
+  }
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'en-IN';
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  toast.show('🎙️ Listening...', 'info', 2000);
+  recognition.start();
+  recognition.onresult = (event) => {
+    const text = event.results[0][0].transcript;
+    searchInput.value = text;
+    searchInput.dispatchEvent(new Event('input'));
+    toast.show(`Heard: "${text}"`, 'success');
+  };
+  recognition.onerror = () => toast.show('Voice recognition failed', 'error');
+});
+
+// ═══════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ═══════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  // Don't trigger shortcuts when typing in inputs
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') {
+    return;
+  }
+
+  if (e.ctrlKey && e.key === 'p') {
+    e.preventDefault();
+    window.print();
+  }
+  if (e.key === 'F2') {
+    e.preventDefault();
+    searchInput.focus();
+  }
+  if (e.key === 'F4') {
+    e.preventDefault();
+    openPaymentModal();
+  }
+  if (e.key === 'Escape') {
+    document.querySelectorAll('dialog[open]').forEach(d => d.close());
+  }
+  if (e.ctrlKey && e.key === 'z') {
+    e.preventDefault();
+    undoLastAction();
+  }
+});
+
+// Focus search on any key
+document.addEventListener('keypress', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+  if (document.querySelector('dialog[open]')) return;
+  if (!state.user) return;
+  searchInput.focus();
+});
+
+// ═══════════════════════════════════════════════
+// FREQUENTLY BOUGHT TOGETHER (AI-like suggestions)
+// ═══════════════════════════════════════════════
+const SUGGESTIONS = {
+  19: [22, 24, 21], // Milk -> Butter, Paneer, Curd
+  28: [33, 36, 37], // Atta -> Oil, Sugar, Salt
+  43: [105, 1], // Maggi -> Ketchup, Onion
+  38: [48, 49], // Lays -> Coca-Cola, Pepsi
+  91: [92, 99], // Dairy Milk -> KitKat, Silk
+  1: [2, 4, 5], // Onion -> Tomato, Chilli, Ginger
+  57: [36, 19], // Tea -> Sugar, Milk
+  60: [61, 63], // Dove -> Colgate, Dettol
+};
+
+// Show suggestions after adding to cart
+function checkSuggestions(productId) {
+  const suggestions = SUGGESTIONS[productId];
+  if (!suggestions) return;
+  const cartIds = state.cart.map(i => i.id);
+  const missing = suggestions.filter(id => !cartIds.includes(id));
+  if (missing.length > 0) {
+    const p = state.getProduct(missing[0]);
+    if (p) {
+      setTimeout(() => {
+        toast.show(`💡 Often bought with: ${p.name} (₹${p.price})`, 'info', 4000);
+      }, 1000);
+    }
+  }
+}
+
+// Monkey-patch addToCart to include suggestions
+const origAddToCart = addToCart;
+addToCart = function(productId, qty) {
+  origAddToCart(productId, qty);
+  checkSuggestions(productId);
+};
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+renderCart();
+renderReceipt();
+updateBillNumber();
+
+// Auto-save periodically
+setInterval(() => state.save(), 30000);
+
+console.log('%c SINGH MART POS v1.0 ', 'background:#FFD600;color:#111;font-size:16px;font-weight:bold;padding:4px 8px;border-radius:4px;');
+console.log('%c Ready for business! ', 'color:#999;font-size:12px;');
+</script>
+</body>
+</html>
